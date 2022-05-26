@@ -7,22 +7,41 @@
 '''
 
 # External imports
-import json
+import json, os
+
+from requests import JSONDecodeError
 
 
 
 # Internal imports
 
 
+def check_directories():
+    ''' 
+    Make sure that CSV and images directories exist.
+    Then ensure that there are files contained within.
+    '''
+
+
+
 # Main function
-
-
 def main():
     ''' Main function for controlling application flow'''
-    # Initalise settings for the program
-    settings = json.load(open(file='./Settings/settings.json', encoding='utf-8'))
+    # initalise program log
     
-    # Initalise objects
+    # Initalise settings for the program
+    try:
+        settings = json.load(open(file='./Settings/settings.json', encoding='utf-8'))
+    except:
+        print("JSONDecodeError()
+        return
+    
+    # Check that files and directories exist
+    check_directories(
+        settings['working_path'], 
+        settings['csv_filename'],
+        settings['images_path']
+        )
 
     # confirm user's image exists in directory
 
