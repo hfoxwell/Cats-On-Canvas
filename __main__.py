@@ -25,7 +25,7 @@ def check_directories(log:logger, *directories ) -> bool:
             log.write_error(FileNotFoundError(f'File or directory MISSING: {arg}'))
             return False
         else:
-            log.write_log(f'File: {arg} found.')
+            log.write_log(f'File: "{arg}" found.')
     
     # If all directories exist return true
     return True
@@ -56,7 +56,7 @@ def main():
         print('Program cannot continue due to fatal error processing files')
         return
 
-    log.write_log("File Checks Complete. Starting Client Generation")
+    log.write_log("File: Checks Complete. Starting Client Generation")
 
     # Create CSV reader
     Csv_reader = reader(settings['csv_filename'])
