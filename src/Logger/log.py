@@ -8,9 +8,6 @@
 from datetime import date
 import os
 
-from matplotlib.pyplot import close
-from prometheus_client import write_to_textfile
-
 # internal imports
 
 # File Class
@@ -34,15 +31,16 @@ class logger():
             if file_exits:
                 # If file exists open file for append
                 self.log_file = open(self.log_file_name,'a')
-                self.log_file.write("Log file opened @ {}".format(date.today()))
+                self.log_file.write("Log file opened @ {}\n".format(date.today()))
             else:
                 # If file does not exist, create file for writing
                 self.log_file = open(self.log_file_name,'x')
                 
                 # Write log created
+                self.log_file.write('#' * 20)
+                self.log_file.write("log file Created @ {} \n".format(date.today()))
                 self.log_file.write("#" * 20)
-                self.log_file.write("log file Created @ {}".format(date.today()))
-                self.log_file.write("#" * 20)
+        
         except OSError:
             print(f'Error creating log file {self.log_file_name}, Error: {OSError}')
             exit()
@@ -50,9 +48,9 @@ class logger():
     def write_log(self, content:str) -> int:
         ''' Writes to the log file automatically appends time'''
         try:
-            self.log_file.write(f'{content} @ {date.today()}')
+            self.log_file.write(f'{content} @ {date.today()}\n')
         except OSError:
-            print(f'Error writing to log file {self.log_file_name}, Error: {OSError}')
+            print(f'Error writing to log file {self.log_file_name}, Error: {OSError}\n')
 
     def write_error(self, error):
         ''' Writes an error to log '''

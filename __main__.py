@@ -9,39 +9,55 @@
 # External imports
 import json, os
 
-from requests import JSONDecodeError
-
-
-
 # Internal imports
+from src.Logger.log import logger
 
 
-def check_directories():
+def check_directories(log:logger, *directories ) -> bool:
     ''' 
     Make sure that CSV and images directories exist.
     Then ensure that there are files contained within.
     '''
+    # For all directories passed into funciton 
+    # Check if they exist
+    for arg in directories:
+        if not(os.path.exists(arg)):
+            log.write_error(FileNotFoundError(f'File or directory MISSING: {arg}'))
+            return False
+        else:
+            log.write_log(f'File: {arg} found.')
+    
+    # If all directories exist return true
+    return True
 
 
 
 # Main function
 def main():
     ''' Main function for controlling application flow'''
-    # initalise program log
-    
+
     # Initalise settings for the program
     try:
+        # Open json file for settings
         settings = json.load(open(file='./Settings/settings.json', encoding='utf-8'))
+    
     except:
-        print("JSONDecodeError()
+        print("Error reading settings file! Please ensure file exists and is valid!")
         return
+
+    # Iitalise program log
+    log = logger(settings['log_filename'], '', settings['working_path'])
     
     # Check that files and directories exist
-    check_directories(
+    if not(check_directories(
+        log,
         settings['working_path'], 
         settings['csv_filename'],
         settings['images_path']
-        )
+        )):
+        print('Program cannot continue due to fatal error processing files')
+        return
+
 
     # confirm user's image exists in directory
 
