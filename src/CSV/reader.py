@@ -6,32 +6,38 @@
 '''
 
 # External imports
+from abc import ABC, abstractmethod
 import csv
+
+from werkzeug import Client
 
 # Internal Imports
 from src.Clients.user import client
-from src.File.sourceFile import csv_Source
+from src.File.sourceFile import *
 
 #File Class
-# TODO: Make this an abstact method for different files 
-class reader():
+class Reader(ABC):
     '''Reader for csv files'''
 
-    def __init__(self, fd:str) -> None:
-        self.file_directory = fd
-        self.client_dictionary = None
-        self.source_file = None
+    @abstractmethod
+    def get_clients(self) -> list:
+       ''' Returns list of clients from file'''
 
+class csv_reader(Reader):
 
-    def get_clients(self) -> dict:
-        ''' Returns a dictionary of items from a csv file '''
-        #TODO: Iterate through csv file and create clients
-        
-        # Create source file object for reading
-        self.source_file = csv_Source(self.file_directory)
+    def __init__(self, src: str) -> None:
+        self.source_file = csv_Source(src).file
 
-        self.client_dictionary = csv.reader(self.source_file.file)
+    def get_clients(self) -> list:
+        ''' Read clients from csv'''
+        # Variables
+        clients:client = []                         # Create list of clients
+        csv_object = csv.reader(self.source_file)
 
-        # TODO: change the test
-        for line in self.client_dictionary:
-            print(f'ROW CONTAINS: {line[0]} {line[1]} {line[2]}')
+        # Iterate through all rows in csv
+        for row in csv_object:
+            # append client to list
+            new_client = client(row[0])
+            clients.append(new_client)
+
+        return clients

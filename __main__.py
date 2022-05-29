@@ -11,7 +11,7 @@ import json, os
 
 # Internal imports
 from src.Logger.log import logger
-from src.CSV.reader import reader
+from src.CSV.reader import *
 
 def check_directories(log:logger, *directories ) -> bool:
     ''' 
@@ -58,9 +58,10 @@ def main():
 
     log.write_log("File: Checks Complete. Starting Client Generation")
 
+
     # Create CSV reader
-    Csv_reader = reader(settings['csv_filename'])
-    Csv_reader.get_clients()
+    file_reader: Reader = csv_reader(settings['csv_filename'])
+    print(file_reader.get_clients())
 
     # confirm user's image exists in directory
 
