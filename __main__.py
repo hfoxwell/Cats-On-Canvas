@@ -60,6 +60,7 @@ def main():
 
     # Create CSV reader
     Csv_reader = reader(settings['csv_filename'])
+    Csv_reader.get_clients()
 
     # confirm user's image exists in directory
 
