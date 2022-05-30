@@ -18,12 +18,12 @@ class image_handler():
     def open_image(self, working_dir: str, image_path: str, image_name: str):
         '''Open an image file'''
         # Ensure image exists
-        if (self.image_exists(working_dir, image_path)):
+        if (self.image_exists(working_dir, image_path, image_name)):
             # If image exists return opened file
-            return open(f'{working_dir}{image_path}{image_name}')
+            return open(f'{working_dir}{image_path}{image_name}','rb').read()
         else:
             return None
 
-    def image_exists(self, working_dir: str, image_path: str) -> bool:
+    def image_exists(self, working_dir: str, image_path: str, image_name: str) -> bool:
         ''' Check that an image exists'''
-        return os.path.exists(f'{working_dir}{image_path}')
+        return os.path.exists(f'{working_dir}{image_path}{image_name}')

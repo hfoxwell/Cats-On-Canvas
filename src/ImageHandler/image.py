@@ -6,7 +6,6 @@
 '''
 # Exernal imports
 from dataclasses import dataclass
-from PIL import Image
 import os
 
 
@@ -15,7 +14,7 @@ import os
 # File Class
 @dataclass
 class image():
-    image_file: Image
+    image_file: bytes
     image_name:str
     image_path: str
     file_type:str

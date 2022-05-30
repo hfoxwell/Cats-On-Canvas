@@ -8,7 +8,7 @@
 
 # External imports
 import json, os
-from ImageHandler.image_handler import image_handler
+from src.ImageHandler.image_handler import image_handler
 
 # Internal imports
 from src.Logger.log import logger
