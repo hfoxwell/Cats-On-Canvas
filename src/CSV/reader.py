@@ -40,7 +40,7 @@ class csv_reader(Reader):
         # Iterate through all rows in csv
         for row in csv_object:
             # append client to list
-            new_client = client(row['client_id'], row['image_filename'])
+            new_client = client(row['client_id'], row['image_filename'], row['image_filetype'])
             clients.append(new_client)
         # BUG: csv.reader includes the first row as an object instead of headings
         return clients

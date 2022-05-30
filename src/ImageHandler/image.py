@@ -7,12 +7,12 @@
 # Exernal imports
 from dataclasses import dataclass
 from pathlib import Path
-from PIL.Image import Image
+
 
 # Internal Imports
 
 # File Class
 @dataclass
 class image():
-    image:Image
+    image_path: str
     file_type:str

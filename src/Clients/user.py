@@ -17,8 +17,9 @@ from src.ImageHandler.image_handler import image_handler
 class client():
     ''' Represents a client '''
     client_id: int
-    image: image.image = image.image
+    image_path: str
+    image_type: str
 
-    def get_image(self):
+    def get_image(self) -> image:
         ''' returns image file '''
         #TODO: return image from file specified

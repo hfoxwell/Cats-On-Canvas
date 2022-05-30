@@ -64,19 +64,19 @@ def main():
     list_of_clients = file_reader.get_clients()
 
     for student in list_of_clients:
-        print(f'{student.client_id} {student.image_path}')
+        log.write_log(f'Current Student: {student.client_id} {student.image_path} {student.image_type}')
 
-    # confirm user's image exists in directory
+        # confirm user's image exists in directory
 
-    #Step 0: Get canvas user ID via SIS ID
+        #Step 0: Get canvas user ID via SIS ID
 
-    # Step 1: Start upload file to user's file storage
+        # Step 1: Start upload file to user's file storage
 
-    # Step 2: Upload Data
+        # Step 2: Upload Data
 
-    # Step 3: Confirm Upload
+        # Step 3: Confirm Upload
 
-    # Step 4: Make API call to set avatar image
+        # Step 4: Make API call to set avatar image
     pass
 
 if __name__ == '__main__':
