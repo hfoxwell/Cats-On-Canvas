@@ -61,12 +61,13 @@ def main():
 
     # Create CSV reader
     file_reader: reader.Reader = reader.csv_reader(settings['csv_filename'])
-    list_of_clients = file_reader.get_clients()
+    list_of_clients = file_reader.get_clients(log)
 
     for student in list_of_clients:
         log.write_log(f'Current Student: {student.client_id} {student.image_path} {student.image_type}')
 
         # confirm user's image exists in directory
+
 
         #Step 0: Get canvas user ID via SIS ID
 

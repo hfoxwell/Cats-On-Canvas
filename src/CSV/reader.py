@@ -9,6 +9,7 @@
 from abc import ABC, abstractmethod
 import csv
 from http.client import ImproperConnectionState
+from ImageHandler.image_handler import image_handler
 
 # Internal Imports
 from src.Clients.user import client
@@ -31,16 +32,15 @@ class csv_reader(Reader):
     def __init__(self, src: str) -> None:
         self.source_file = csv_Source(src).file
 
-    def get_clients(self) -> list:
-        ''' Read clients from csv'''
+    def get_clients(self, logger: logger) -> list:
+        ''' Read clients from csv and return details'''
         # Variables
-        clients:client = []                         # Create list of clients
+        clients_list = []                         # Create list of clients
         csv_object = csv.DictReader(self.source_file)
 
         # Iterate through all rows in csv
         for row in csv_object:
-            # append client to list
-            new_client = client(row['client_id'], row['image_filename'], row['image_filetype'])
-            clients.append(new_client)
-        # BUG: csv.reader includes the first row as an object instead of headings
+            # For each row in the dictionary 
+            
+
         return clients

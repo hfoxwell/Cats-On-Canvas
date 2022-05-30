@@ -6,7 +6,8 @@
 '''
 # Exernal imports
 from dataclasses import dataclass
-from pathlib import Path
+from PIL import Image
+import os
 
 
 # Internal Imports
@@ -14,5 +15,8 @@ from pathlib import Path
 # File Class
 @dataclass
 class image():
+    image_file: Image
+    image_name:str
     image_path: str
     file_type:str
+    image_size = os.path.getsize(image_path)
