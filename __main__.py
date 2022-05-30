@@ -8,6 +8,7 @@
 
 # External imports
 import json, os
+from ImageHandler.image_handler import image_handler
 
 # Internal imports
 from src.Logger.log import logger
@@ -22,7 +23,7 @@ def check_directories(log:logger, *directories ) -> bool:
     # Check if they exist
     for arg in directories:
         if not(os.path.exists(arg)):
-            log.write_error(FileNotFoundError(f'File or directory MISSING: {arg}'))
+            log.write_error(FileNotFoundError(f'FILE: File or directory MISSING: {arg}'))
             return False
         else:
             log.write_log(f'File: "{arg}" found.')
@@ -33,6 +34,8 @@ def check_directories(log:logger, *directories ) -> bool:
 # Main function
 def main():
     ''' Main function for controlling application flow'''
+
+
 
     # Initalise settings for the program
     try:
@@ -61,12 +64,33 @@ def main():
 
     # Create CSV reader
     file_reader: reader.Reader = reader.csv_reader(settings['csv_filename'])
-    list_of_clients = file_reader.get_clients(log)
+    list_of_clients = file_reader.get_clients()
 
     for student in list_of_clients:
-        log.write_log(f'Current Student: {student.client_id} {student.image_path} {student.image_type}')
+        log.write_log(f'Current Student: {student}')
 
         # confirm user's image exists in directory
+        img_handler = image_handler()
+        img = img_handler.open_image(
+            settings['working_path'],
+            settings['images_path'],
+            student['image_filename']
+        )
+        if img == None:
+            log.write_error(FileNotFoundError(f'FILE: {student["image_filename"]} cannot be found'))
+            log.write_log(f'USER: user, {student["client_id"]} Skipped as no image could be found')
+            continue
+        else:
+            # Create user object
+            '''
+            TODO: Find a way to create the user object so that MAIN does not need to be aware of clients. 
+            This may need a controller or something along those lines. 
+            '''
+            '''
+            TODO: Main is too busy. This needs to be a more single responsiblity function. rewrite this so
+            that main is only responsible for working with the controlers. This may mean creating 
+            some controllers. 
+            '''
 
 
         #Step 0: Get canvas user ID via SIS ID

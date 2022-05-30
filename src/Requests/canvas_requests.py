@@ -65,4 +65,8 @@ class Canvas_requester():
         json_res = json.loads(responese.text,object_pairs_hook=collections.OrderedDict)
 
         # Prepare data
+        ''' 
+        TODO: As the image is stored inside the user object. The user needs to be created with an image.
+        This is currently not done. So refactoring of the reader and user creation needed.  
+        '''
 
