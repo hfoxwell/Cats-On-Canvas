@@ -69,8 +69,5 @@ def upload_image(user: client) -> bool:
     _data[1] = ('upload_params',_data[1][1].items())
 
     upload_file_response = requests.post(json_res['upload_url'],data=_data[1][1],files=files,allow_redirects=False)
-    ''' 
-    TODO: As the image is stored inside the user object. The user needs to be created with an image.
-    This is currently not done. So refactoring of the reader and user creation needed.  
-    '''
+   
 

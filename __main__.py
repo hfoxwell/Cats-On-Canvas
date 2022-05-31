@@ -7,7 +7,8 @@
 '''
 
 # External imports
-import json, os
+import json, os, PIL
+from tkinter import Image
 
 # Internal imports
 from src.ImageHandler.image_handler import open_image
@@ -35,7 +36,9 @@ def check_directories(*directories ) -> bool:
 # Main function
 def main():
     ''' Main function for controlling application flow'''
-
+    # Variables
+    userList: list = []
+    list_of_clients: list = []
 
 
     # Initalise settings for the program
@@ -63,28 +66,10 @@ def main():
     file_reader: reader.Reader = reader.csv_reader(settings['csv_filename'])
     list_of_clients = file_reader.get_clients()
 
+    # For each dictionary in the list
+    # log details and create a user object
     for student in list_of_clients:
-        write_log(f'Current Student: {student}')
-
-        # confirm user's image exists in directory
-        img = open_image(
-            settings['working_path'],
-            settings['images_path'],
-            student['image_filename']
-        )
-        if img == None:
-            write_error(FileNotFoundError(f'FILE: {student["image_filename"]} cannot be found'))
-            write_log(f'USER: user, {student["client_id"]} Skipped as no image could be found')
-            continue
-        else:
-            # Create user object
-
-            user: client = client(
-                student['client_id'], 
-                img
-                )
-
-        print(user)
+        
         '''
         TODO: Find a way to create the user object so that MAIN does not need to be aware of clients. 
         This may need a controller or something along those lines. 
@@ -94,7 +79,41 @@ def main():
         that main is only responsible for working with the controlers. This may mean creating 
         some controllers. 
         '''
+        
+        write_log(f'Current Student: {student}')
 
+        # confirm user's image exists in directory
+        img = open_image(
+            settings['working_path'],
+            settings['images_path'],
+            student['image_filename']
+        )
+        # Check if image is null
+        # If image is null, no image exists so raise error
+        if img == None:
+            write_error(FileNotFoundError(f'FILE: {student["image_filename"]} cannot be found'))
+            write_log(f'USER: user, {student["client_id"]} Skipped as no image could be found')
+            continue
+        else:
+            # Create user object
+            try:
+                user: client = client(
+                    student['client_id'], 
+                    img
+                    )
+            except:
+                # Catch error creating user
+                # Write this to log
+                write_error(Exception(f'USER: Could not create user {student["client_id"]}'))
+                continue
+
+        print(f'User ID: {user.client_id}')
+        print(user.image.image_name)
+        # Add user object to list of users
+        userList.append(user)
+
+    # Now that users have been created upload them to canvas
+    write_log(f'All possible users have been created. A total of {len(userList)}')
 
         #Step 0: Get canvas user ID via SIS ID
 
