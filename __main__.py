@@ -78,6 +78,7 @@ def main():
             continue
         else:
             # Create user object
+            
             '''
             TODO: Find a way to create the user object so that MAIN does not need to be aware of clients. 
             This may need a controller or something along those lines. 
