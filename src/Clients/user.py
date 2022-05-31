@@ -9,7 +9,6 @@
 
 # Internal Imports
 from src.ImageHandler.image import image
-from src.ImageHandler.image_handler import image_handler
 
 # File Class
 class client():

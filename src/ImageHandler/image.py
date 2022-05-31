@@ -13,7 +13,7 @@ import os
 
 # File Class
 @dataclass
-class image():
+class image:
     image_file: bytes
     image_name:str
     image_path: str
