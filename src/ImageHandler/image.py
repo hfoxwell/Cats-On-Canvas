@@ -5,7 +5,7 @@
         Class representing an image
 '''
 # Exernal imports
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import os
 
 
@@ -14,8 +14,11 @@ import os
 # File Class
 @dataclass
 class image:
-    image_file: bytes
-    image_name:str
-    image_path: str
-    file_type:str
-    image_size = os.path.getsize(image_path)
+    image_file: bytes = field(compare=False)
+    image_name:str = field(compare=True)
+    image_path: str = field(compare=False)
+    file_type:str = field(compare=False)
+    image_size = field(init=False)
+
+    def __post_init__(self):
+        self.image_size = os.path.getsize(self.image_file)

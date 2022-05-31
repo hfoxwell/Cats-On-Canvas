@@ -8,9 +8,10 @@
 
 # External imports
 import json, os
-from src.ImageHandler.image_handler import image_handler
 
 # Internal imports
+from src.ImageHandler.image_handler import open_image
+from src.Clients.user import client
 from src.Logger.log import write_log, write_error
 from src.CSV import reader
 
@@ -66,8 +67,7 @@ def main():
         write_log(f'Current Student: {student}')
 
         # confirm user's image exists in directory
-        img_handler = image_handler()
-        img = img_handler.open_image(
+        img = open_image(
             settings['working_path'],
             settings['images_path'],
             student['image_filename']
@@ -78,16 +78,22 @@ def main():
             continue
         else:
             # Create user object
-            
-            '''
-            TODO: Find a way to create the user object so that MAIN does not need to be aware of clients. 
-            This may need a controller or something along those lines. 
-            '''
-            '''
-            TODO: Main is too busy. This needs to be a more single responsiblity function. rewrite this so
-            that main is only responsible for working with the controlers. This may mean creating 
-            some controllers. 
-            '''
+
+            user: client = client(
+                student['client_id'], 
+                img
+                )
+
+        print(user)
+        '''
+        TODO: Find a way to create the user object so that MAIN does not need to be aware of clients. 
+        This may need a controller or something along those lines. 
+        '''
+        '''
+        TODO: Main is too busy. This needs to be a more single responsiblity function. rewrite this so
+        that main is only responsible for working with the controlers. This may mean creating 
+        some controllers. 
+        '''
 
 
         #Step 0: Get canvas user ID via SIS ID

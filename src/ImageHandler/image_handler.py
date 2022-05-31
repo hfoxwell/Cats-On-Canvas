@@ -9,21 +9,25 @@
 # External imports
 import os
 
-# Internal Imports
+# Internal Imports\
+from src.ImageHandler.image import image
 
-# File Class
-class image_handler():
-    ''' Handles all images for the app '''    
+# File module
+''' Handles all images for the app '''    
 
-    def open_image(self, working_dir: str, image_path: str, image_name: str):
-        '''Open an image file'''
-        # Ensure image exists
-        if (self.image_exists(working_dir, image_path, image_name)):
-            # If image exists return opened file
-            return open(f'{working_dir}{image_path}{image_name}','rb').read()
-        else:
-            return None
+def open_image(working_dir: str, image_path: str, image_name: str) -> image:
+    '''Open an image file'''
+    # Ensure image exists
+    if (image_exists(working_dir, image_path, image_name)):
+        # If image exists return opened file
+        img_bytes = open(f'{working_dir}{image_path}{image_name}','rb').read()
+        
+        img = image(img_bytes, image_name, image_path, "")
 
-    def image_exists(self, working_dir: str, image_path: str, image_name: str) -> bool:
-        ''' Check that an image exists'''
-        return os.path.exists(f'{working_dir}{image_path}{image_name}')
+        return img
+    else:
+        return None
+
+def image_exists(working_dir: str, image_path: str, image_name: str) -> bool:
+    ''' Check that an image exists'''
+    return os.path.exists(f'{working_dir}{image_path}{image_name}')
