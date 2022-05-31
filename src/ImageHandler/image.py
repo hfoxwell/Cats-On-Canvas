@@ -21,4 +21,4 @@ class image:
     image_size:int = field(init=False)
 
     def __post_init__(self):
-        self.image_size = os.path.getsize(self.image_file)
+        self.image_size = os.path.getsize(f'{self.image_path}{self.image_name}')
