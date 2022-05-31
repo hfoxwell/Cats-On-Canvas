@@ -15,12 +15,12 @@ from src.ImageHandler.image import image
 # File module
 ''' Handles all images for the app '''    
 
-def open_image(working_dir: str, image_path: str, image_name: str) -> image:
+def open_image(image_path: str, image_name: str) -> image:
     '''Open an image file'''
     # Ensure image exists
-    if (image_exists(working_dir, image_path, image_name)):
+    if (image_exists(image_path, image_name)):
         # If image exists return opened file
-        img_bytes = open(f'{working_dir}{image_path}{image_name}','rb').read()
+        img_bytes = open(f'{image_path}{image_name}','rb').read()
         
         img = image(img_bytes, image_name, image_path, "")
 
@@ -28,6 +28,6 @@ def open_image(working_dir: str, image_path: str, image_name: str) -> image:
     else:
         return None
 
-def image_exists(working_dir: str, image_path: str, image_name: str) -> bool:
+def image_exists(image_path: str, image_name: str) -> bool:
     ''' Check that an image exists'''
-    return os.path.exists(f'{working_dir}{image_path}{image_name}')
+    return os.path.exists(f'{image_path}{image_name}')

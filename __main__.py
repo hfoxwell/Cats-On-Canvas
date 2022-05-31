@@ -84,7 +84,6 @@ def main():
 
         # confirm user's image exists in directory
         img = open_image(
-            settings['working_path'],
             settings['images_path'],
             student['image_filename']
         )

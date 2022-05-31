@@ -13,7 +13,6 @@ import requests, json, collections
 # Internal imports
 from src.Clients.user import client
 from src.Logger.log import write_error, write_log
-from src.ImageHandler.image_handler import open_image
 
 
 class Canvas_connector(ABC):
