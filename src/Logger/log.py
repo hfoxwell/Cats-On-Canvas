@@ -12,7 +12,7 @@ import os, json
 
 # File module
 # Global variables
-settings = json.load('./Settings/settings.json')
+settings = json.load(open(file='./Settings/settings.json', encoding='utf-8'))
 log_file_name:str = settings['log_filename']
 log_file_path:str = f'{settings["working_path"]}{settings["log_filename"]}'
 
@@ -47,7 +47,6 @@ def write_log(content:str) -> int:
         log_file.write(f'{content} @ {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}\n')
     except OSError:
         print(f'Error writing to log file {log_file_name}, Error: {OSError}\n')
-    close_log()
     
 def write_error(error):
     ''' Writes an error to log '''

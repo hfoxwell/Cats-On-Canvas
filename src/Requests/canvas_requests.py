@@ -11,13 +11,13 @@ import requests, json, collections
 
 # Internal imports
 from src.Clients.user import client
-from src.Logger.log import logger
+from src.Logger.log import write_error, write_log
 
 
 # Module Functions
 
 ''' For passing information to canvas '''
-settings = json.load("./Settings/settings.json")
+settings = json.load(open(file='./Settings/settings.json', encoding='utf-8'))
 Auth_token: str = settings['access_token']
 domain: str = f'https://{settings["domain"]}/api/v1/users'
 header: str = ""
@@ -26,7 +26,7 @@ params: tuple = {}
 def get_canvas_user_id(user:client) -> bool:
     ''' Gets a user ID from Canvas '''
     
-    logger.write_log(
+    write_log(
         f'USER: Getting Canvas ID for: {user.client_id}'
     )
 
@@ -40,7 +40,7 @@ def get_canvas_user_id(user:client) -> bool:
         user.client_id = user_Details.json()['id']
         return True
     else:
-        logger.write_error(f'USER: {user.client_id} cannot be found in canvas')
+        write_error(f'USER: {user.client_id} cannot be found in canvas')
         return False
 
 def upload_image(user: client) -> bool:

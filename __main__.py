@@ -11,10 +11,10 @@ import json, os
 from src.ImageHandler.image_handler import image_handler
 
 # Internal imports
-from src.Logger.log import logger
+from src.Logger.log import write_log, write_error
 from src.CSV import reader
 
-def check_directories(log:logger, *directories ) -> bool:
+def check_directories(*directories ) -> bool:
     ''' 
     Make sure that CSV and images directories exist.
     Then ensure that there are files contained within.
@@ -23,10 +23,10 @@ def check_directories(log:logger, *directories ) -> bool:
     # Check if they exist
     for arg in directories:
         if not(os.path.exists(arg)):
-            log.write_error(FileNotFoundError(f'FILE: File or directory MISSING: {arg}'))
+            write_error(FileNotFoundError(f'FILE: File or directory MISSING: {arg}'))
             return False
         else:
-            log.write_log(f'File: "{arg}" found.')
+            write_log(f'File: "{arg}" found.')
     
     # If all directories exist return true
     return True
@@ -45,13 +45,9 @@ def main():
     except:
         print("Error reading settings file! Please ensure file exists and is valid!")
         return
-
-    # Iitalise program log
-    log = logger(settings['log_filename'], '', settings['working_path'])
     
     # Check that files and directories exist
     if not(check_directories(
-        log,
         settings['working_path'], 
         settings['csv_filename'],
         settings['images_path']
@@ -59,7 +55,7 @@ def main():
         print('Program cannot continue due to fatal error processing files')
         return
 
-    log.write_log("File: Checks Complete. Starting Client Generation")
+    write_log("File: Checks Complete. Starting Client Generation")
 
 
     # Create CSV reader
@@ -67,7 +63,7 @@ def main():
     list_of_clients = file_reader.get_clients()
 
     for student in list_of_clients:
-        log.write_log(f'Current Student: {student}')
+        write_log(f'Current Student: {student}')
 
         # confirm user's image exists in directory
         img_handler = image_handler()
@@ -77,8 +73,8 @@ def main():
             student['image_filename']
         )
         if img == None:
-            log.write_error(FileNotFoundError(f'FILE: {student["image_filename"]} cannot be found'))
-            log.write_log(f'USER: user, {student["client_id"]} Skipped as no image could be found')
+            write_error(FileNotFoundError(f'FILE: {student["image_filename"]} cannot be found'))
+            write_log(f'USER: user, {student["client_id"]} Skipped as no image could be found')
             continue
         else:
             # Create user object
