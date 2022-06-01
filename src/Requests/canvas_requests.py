@@ -17,12 +17,40 @@ from src.Logger.log import write_error, write_log
 
 class Canvas_connector(ABC):
     '''Abstract base class for canvas connector'''
-    def __init__(self) -> None:
-        self.settings = json.load(open(file='./Settings/settings.json', encoding='utf-8'))
-        self.Auth_token: str = self.settings['access_token']
-        self.domain: str = f'https://{self.settings["domain"]}/api/v1/users'
-        self.header: str = ""
+    
+    def __init__(self, Token: str, domain:str) -> None:
+        ''' Initalise a connector'''
+        #self.settings = json.load(open(file='./Settings/settings.json', encoding='utf-8'))
+        self.Auth_token: str = Token
+        self.domain: str = f'https://{domain}/api/v1'
+        self.header: tuple = {'Authorization' : f'Bearer {self.Auth_token}'}
         self.params: tuple = {}
+
+        # Log initalised values
+        write_log(
+            f'CANVAS: initalised values:',
+            f'Auth Token:\t {self.Auth_token}',
+            f'Domain:\t {self.domain}',
+            f'Header:\t {self.header}',
+            f'Params:\t {self.params}'
+        )
+        # Call Canvas Test function
+        self.test_canvas_connection()
+
+    def test_canvas_connection(self):
+        '''Validates that connection to canvas can be made'''
+        # Variables
+        desired_result = 200
+
+        res = requests.get(f'{self.domain}/accounts',self.params,headers=self.header)
+        if res.status_code == desired_result:
+            # If result 200 then return true
+            write_log("CANVAS: Connection Successfully Tested")
+            return True
+        else:
+            # If other result recieved return false
+            write_error(ConnectionRefusedError("Canvas Refused the connection"))
+            raise ConnectionRefusedError("Canvas Refused the connection") 
 
     @abstractmethod
     def get_canvas_id(self, user:client) -> bool:
@@ -34,16 +62,16 @@ class Canvas_connector(ABC):
 
 class POST_data_canvas(Canvas_connector):
     
-    def __init__(self) -> None:
+    def __init__(self, Token: str, domain:str) -> None:
         ''' For passing information to canvas '''
-        super().__init__()
+        super().__init__(Token, domain)
         
         # settings = json.load(open(file='./Settings/settings.json', encoding='utf-8'))
         # Auth_token: str = settings['access_token']
         # domain: str = f'https://{settings["domain"]}/api/v1/users'
         # header: str = ""
         # params: tuple = {}
-
+    
     def get_canvas_id(self, user:client) -> bool:
         ''' Gets a user ID from Canvas '''
         
@@ -52,7 +80,7 @@ class POST_data_canvas(Canvas_connector):
         )
 
         user_Details = requests.get(
-            f'{self.domain}/sis_user_id:{user.client_id}',
+            f'{self.domain}users/sis_user_id:{user.client_id}',
             headers=self.header,
             params=self.params
         )

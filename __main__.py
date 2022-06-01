@@ -7,8 +7,7 @@
 '''
 
 # External imports
-import json, os, PIL
-from tkinter import Image
+import json, os
 
 # Internal imports
 from src.ImageHandler.image_handler import open_image
@@ -130,10 +129,12 @@ def main():
     # Now that users have been created upload them to canvas
     write_log(f'All possible users have been created. A total of {len(user_list)}')
     write_log(f'Creating canvas object...')
+    
     # Create and initalise canvas connector
     try:
-        connector = POST_data_canvas()
+        connector = POST_data_canvas(settings['access_token'], settings['domain'])
         #  Attempt to connect to canvas
+        pass
     except:
         # If error is reported in connecting to canvas
         write_error(Exception(f'CONNECTOR: Error connecting to canvas. Exiting application.'))

@@ -41,10 +41,11 @@ except OSError:
     print(f'Error creating/accessing log file {log_file_name}, Error: {OSError}')
     exit()
 
-def write_log(content:str) -> int:
+def write_log(*content) -> int:
     ''' Writes to the log file automatically appends time'''
     try:
-        log_file.write(f'{content} @ {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}\n')
+        for item in content:
+            log_file.write(f'{item} @ {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}\n')
     except OSError:
         print(f'Error writing to log file {log_file_name}, Error: {OSError}\n')
     
