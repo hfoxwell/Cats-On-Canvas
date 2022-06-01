@@ -150,6 +150,7 @@ def main():
             # If connector cannot get user id skip user
             write_log(f"CANVAS: Skipping user: {student.client_id}")
             continue
+        print(student.client_id)
 
         # Step 1: Start upload file to user's file storage
 

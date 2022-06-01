@@ -49,7 +49,7 @@ class Canvas_connector(ABC):
             return True
         else:
             # If other result recieved return false
-            write_error(ConnectionRefusedError("Canvas Refused the connection"))
+            write_error(ConnectionRefusedError(f"Canvas Refused the connection: {res.status_code}"))
             raise ConnectionRefusedError("Canvas Refused the connection") 
 
     @abstractmethod
