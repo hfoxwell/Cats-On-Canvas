@@ -146,8 +146,11 @@ def main():
     for student in user_list:
         ''' For each student in user list upload data to canvas '''
         #Step 0: Get canvas user ID via SIS ID
-        connector.get_canvas_id(student)
-        
+        if not connector.get_canvas_id(student):
+            # If connector cannot get user id skip user
+            write_log(f"CANVAS: Skipping user: {student.client_id}")
+            continue
+
         # Step 1: Start upload file to user's file storage
 
         # Step 2: Upload Data
