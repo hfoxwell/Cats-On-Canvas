@@ -34,11 +34,11 @@ try:
         
         # Write log created
         log_file.write('#' * 20)
-        log_file.write("log file Created @ {} \n".format(datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
-        log_file.write("#" * 20)
+        log_file.write("log file Created @ {}".format(datetime.now().strftime("%d/%m/%Y %H:%M:%S")))
+        log_file.write(f'{"#" * 20}\n')
 
 except OSError:
-    print(f'Error creating log file {log_file_name}, Error: {OSError}')
+    print(f'Error creating/accessing log file {log_file_name}, Error: {OSError}')
     exit()
 
 def write_log(content:str) -> int:
