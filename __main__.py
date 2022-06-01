@@ -15,6 +15,7 @@ from src.ImageHandler.image_handler import open_image
 from src.Clients.user import client
 from src.Logger.log import write_log, write_error
 from src.CSV import reader
+from src.Requests.canvas_requests import POST_data_canvas
 
 def check_directories(*directories ) -> bool:
     ''' 
@@ -33,11 +34,63 @@ def check_directories(*directories ) -> bool:
     # If all directories exist return true
     return True
 
+def Create_student_list(client_list:list, img_location:str) -> list:
+    ''' Returns a list of user objects'''
+    # Variables
+    userList: list = []
+    
+    # Iterate through list from Csv
+    for student in client_list:
+        
+        '''
+        TODO: Find a way to create the user object so that MAIN does not need to be aware of clients. 
+        This may need a controller or something along those lines. 
+        '''
+        '''
+        TODO: Main is too busy. This needs to be a more single responsiblity function. rewrite this so
+        that main is only responsible for working with the controlers. This may mean creating 
+        some controllers. 
+        '''
+        
+        write_log(f'Current Student: {student}')
+
+        # confirm user's image exists in directory
+        img = open_image(
+            img_location,
+            student['image_filename']
+        )
+        # Check if image is null
+        # If image is null, no image exists so raise error
+        if img == None:
+            write_error(FileNotFoundError(f'FILE: {student["image_filename"]} cannot be found'))
+            write_log(f'USER: user, {student["client_id"]} Skipped as no image could be found')
+            continue
+        else:
+            # Create user object
+            try:
+                user: client = client(
+                    student['client_id'], 
+                    img
+                    )
+            except:
+                # Catch error creating user
+                # Write this to log
+                write_error(Exception(f'USER: Could not create user {student["client_id"]}'))
+                continue
+
+        print(f'User ID: {user.client_id}')
+        print(user.image.image_name)
+        # Add user object to list of users
+        userList.append(user)
+    
+    # Return list of user objects
+    return userList
+
 # Main function
 def main():
     ''' Main function for controlling application flow'''
     # Variables
-    userList: list = []
+   
     list_of_clients: list = []
 
 
@@ -68,52 +121,27 @@ def main():
 
     # For each dictionary in the list
     # log details and create a user object
-    for student in list_of_clients:
-        
-        '''
-        TODO: Find a way to create the user object so that MAIN does not need to be aware of clients. 
-        This may need a controller or something along those lines. 
-        '''
-        '''
-        TODO: Main is too busy. This needs to be a more single responsiblity function. rewrite this so
-        that main is only responsible for working with the controlers. This may mean creating 
-        some controllers. 
-        '''
-        
-        write_log(f'Current Student: {student}')
-
-        # confirm user's image exists in directory
-        img = open_image(
-            settings['images_path'],
-            student['image_filename']
+    
+    user_list = Create_student_list(
+        list_of_clients,
+        settings['images_path']
         )
-        # Check if image is null
-        # If image is null, no image exists so raise error
-        if img == None:
-            write_error(FileNotFoundError(f'FILE: {student["image_filename"]} cannot be found'))
-            write_log(f'USER: user, {student["client_id"]} Skipped as no image could be found')
-            continue
-        else:
-            # Create user object
-            try:
-                user: client = client(
-                    student['client_id'], 
-                    img
-                    )
-            except:
-                # Catch error creating user
-                # Write this to log
-                write_error(Exception(f'USER: Could not create user {student["client_id"]}'))
-                continue
-
-        print(f'User ID: {user.client_id}')
-        print(user.image.image_name)
-        # Add user object to list of users
-        userList.append(user)
 
     # Now that users have been created upload them to canvas
-    write_log(f'All possible users have been created. A total of {len(userList)}')
-
+    write_log(f'All possible users have been created. A total of {len(user_list)}')
+    write_log(f'Creating canvas object...')
+    # Create and initalise canvas connector
+    try:
+        connector = POST_data_canvas()
+        #  Attempt to connect to canvas
+    except:
+        # If error is reported in connecting to canvas
+        write_error(Exception(f'CONNECTOR: Error connecting to canvas. Exiting application.'))
+        print(Exception('Error connecting to canvas, Quitting application'))
+        exit()
+    write_log("Successfully created canvas connection. Commencing upload.")
+    for student in user_list:
+        ''' For each student in user list upload data to canvas '''
         #Step 0: Get canvas user ID via SIS ID
 
         # Step 1: Start upload file to user's file storage

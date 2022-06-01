@@ -130,3 +130,6 @@ dmypy.json
 
 # log file from testing
 Log.txt
+
+# Remove testing
+Settings/settings.json

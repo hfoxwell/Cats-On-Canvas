@@ -17,7 +17,6 @@ from src.Logger.log import write_error, write_log
 
 class Canvas_connector(ABC):
     '''Abstract base class for canvas connector'''
-
     def __init__(self) -> None:
         self.settings = json.load(open(file='./Settings/settings.json', encoding='utf-8'))
         self.Auth_token: str = self.settings['access_token']
@@ -36,15 +35,16 @@ class Canvas_connector(ABC):
 class POST_data_canvas(Canvas_connector):
     
     def __init__(self) -> None:
+        ''' For passing information to canvas '''
         super().__init__()
-        # ''' For passing information to canvas '''
+        
         # settings = json.load(open(file='./Settings/settings.json', encoding='utf-8'))
         # Auth_token: str = settings['access_token']
         # domain: str = f'https://{settings["domain"]}/api/v1/users'
         # header: str = ""
         # params: tuple = {}
 
-    def get_canvas_user_id(self, user:client) -> bool:
+    def get_canvas_id(self, user:client) -> bool:
         ''' Gets a user ID from Canvas '''
         
         write_log(
@@ -64,7 +64,7 @@ class POST_data_canvas(Canvas_connector):
             write_error(f'USER: {user.client_id} cannot be found in canvas')
             return False
 
-    def upload_image(self, user: client) -> bool:
+    def upload_user_data(self, user: client) -> bool:
         ''' Upload image to users files '''
         # Variables
         url: str = self.domain + '/self/files'
