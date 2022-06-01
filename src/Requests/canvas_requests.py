@@ -80,12 +80,12 @@ class POST_data_canvas(Canvas_connector):
         )
 
         user_Details = requests.get(
-            f'{self.domain}users/sis_user_id:{user.client_id}',
+            f'{self.domain}/users/sis_user_id:{user.client_id}',
             headers=self.header,
             params=self.params
         )
 
-        if 'id' in user_Details.json:
+        if 'id' in user_Details.json():
             user.client_id = user_Details.json()['id']
             return True
         else:
