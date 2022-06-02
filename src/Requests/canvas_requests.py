@@ -95,7 +95,7 @@ class POST_data_canvas(Canvas_connector):
     def upload_user_data(self, user: client) -> bool:
         ''' Upload image to users files '''
         # Variables
-        url: str = self.domain + '/self/files'
+        url: str = self.domain + '/users/self/files'
         inform_parameters = {
             'name':user.image.image_name,
             'size':user.image.image_size, # read the filesize
@@ -105,17 +105,33 @@ class POST_data_canvas(Canvas_connector):
             }
         
         # Prepare Canvas for upload
-        responese = requests.post(url,headers=self.header,data=inform_parameters)
+        response = requests.post(url,headers=self.header,data=inform_parameters)
+        # json_res = json.loads(response.text)
+        # # Get response and send data
+        json_res = json.loads(response.text)
 
-        # Get response and send data
-        json_res = json.loads(responese.text,object_pairs_hook=collections.OrderedDict)
-
-        # Prepare data
-        files = user.image.image_file
+        # # Prepare data
+        files = {'file' : user.image.image_file}
 
         _data = json_res.items()
-        _data[1] = ('upload_params',_data[1][1].items())
 
-        upload_file_response = requests.post(json_res['upload_url'],data=_data[1][1],files=files,allow_redirects=False)
+        self.params = json_res['upload_params']
+        # _data[1] = ('upload_params',_data[1][1].items())
+
+        # Send the file to canvas
+        upload_file_response = requests.post(json_res['upload_url'],data=self.params,files=files,allow_redirects=False)
+
+        # Testing
+        print(upload_file_response, upload_file_response.text)
+        if upload_file_response.status_code >= 301:
+            # Post to confirm upload
+            pass
+        elif upload_file_response.status_code == 200:
+            # Upload completed
+            pass
+        else:
+            # Upload has failed
+            pass
+
     
 

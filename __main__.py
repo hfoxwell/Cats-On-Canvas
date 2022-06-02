@@ -153,7 +153,7 @@ def main():
         print(student.client_id)
 
         # Step 1: Start upload file to user's file storage
-
+        connector.upload_user_data(student)
         # Step 2: Upload Data
 
         # Step 3: Confirm Upload
