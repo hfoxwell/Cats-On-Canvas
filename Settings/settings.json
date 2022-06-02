@@ -1,7 +1,7 @@
 {
     "working_path" : "./",
-    "access_token" : "16365~fBsHOTuM3Icv4YTFl0rjhkRFvuSe3PP2pgyCe2RQr5T1m8crQ1GsoRlzsCgAZI6N",
-    "domain" : "kings.instructure.com",
+    "access_token" : "",
+    "domain" : "",
     "csv_filename" : "CSV_data/data.csv",
     "images_path" : "Images/",
     "log_filename" : "Log.txt"
