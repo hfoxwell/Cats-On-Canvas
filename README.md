@@ -66,7 +66,7 @@ The default state for the settings file as found in this repository is as follow
 {
     "working_path" : "./",
     "access_token" : "",
-    "domain" : "kings.instructure.com",
+    "domain" : "",
     "csv_filename" : "CSV_data/data.csv",
     "images_path" : "Images/",
     "log_filename" : "Log.txt"
