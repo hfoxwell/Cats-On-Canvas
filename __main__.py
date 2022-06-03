@@ -77,11 +77,28 @@ def Create_student_list(client_list:list, img_location:str) -> list:
                 write_error(Exception(f'USER: Could not create user {student["client_id"]}'))
                 continue
 
-        print(f'User ID: {user.client_id}')
-        print(user.image.image_name)
+        ###################
+        # Print out created user details
+        ###################
+        print(
+            f'Creating User: {user.client_id}',
+            f'With Image: {user.image.image_name}',
+            sep='\t'
+        )
+
         # Add user object to list of users
         userList.append(user)
     
+    ###############################
+    # Console & log Number of users
+    ###############################
+    write_log(
+        f'Total of {len(userList)} users created'
+    )
+    print(
+        f'Total of {len(userList)} users created'
+    )
+
     # Return list of user objects
     return userList
 
@@ -92,8 +109,9 @@ def main():
    
     list_of_clients: list = []
 
-
+    #######################################
     # Initalise settings for the program
+    #######################################
     try:
         # Open json file for settings
         settings = json.load(open(file='./Settings/settings.json', encoding='utf-8'))
@@ -113,27 +131,38 @@ def main():
 
     write_log("File: Checks Complete. Starting Client Generation")
 
-
+    ######################################
     # Create CSV reader
+    ######################################
     file_reader: reader.Reader = reader.csv_reader(settings['csv_filename'])
     list_of_clients = file_reader.get_clients()
 
+    ######################################
+    # Create users
+    #####################################
     # For each dictionary in the list
     # log details and create a user object
-    
     user_list = Create_student_list(
         list_of_clients,
         settings['images_path']
         )
 
     # Now that users have been created upload them to canvas
-    write_log(f'All possible users have been created. A total of {len(user_list)}')
-    write_log(f'Creating canvas object...')
+    # if no users have been created. Then EXIT the program
+    if (len(user_list)):
+        write_log(f'All possible users have been created. A total of {len(user_list)}')
+        write_log(f'Creating canvas object...')
+    else:
+        print("No users were created. Closing application")
+        write_error("USER: no users were found. Exiting..")
+        exit()
     
+    #########################################
     # Create and initalise canvas connector
-    connector = POST_data_canvas(settings['access_token'], settings['domain'])
+    #########################################
     try:
         #  Attempt to connect to canvas
+        connector = POST_data_canvas(settings['access_token'], settings['domain'])
         pass
     except:
         # If error is reported in connecting to canvas
@@ -142,26 +171,34 @@ def main():
         exit()
     write_log("Successfully created canvas connection. Commencing upload.")
     
+    ########################################
     # For each user Start upload process
-    for student in user_list:
+    ########################################
+    count_of_uploaded_users:int = 1
+    for user in user_list:
         ''' For each student in user list upload data to canvas '''
         
         #Step 0: Get canvas user ID via SIS ID
-        if not connector.get_canvas_id(student):
+        if not connector.get_canvas_id(user):
             # If connector cannot get user id skip user
-            write_log(f"CANVAS: Skipping user: {student.client_id}")
+            write_log(f"CANVAS: Skipping user: {user.client_id}")
             continue
 
         # Step 1: Start upload file to user's file storage
-        if not connector.upload_user_data(student):
+        if not connector.upload_user_data(user):
             # if no upload happened log and next student
-            write_log(f'CANVAS: Skipping user: {student.client_id} File could not be uploaded')
+            write_log(f'CANVAS: Skipping user: {user.client_id} File could not be uploaded')
             continue
 
         # Step 2: Make API call to set avatar image
-        if not connector.set_image_as_avatar(student):
-            write_error(f'CANVAS: Error changing profile picture for: {student.client_id}')
+        if not connector.set_image_as_avatar(user):
+            write_error(f'CANVAS: Error changing profile picture for: {user.client_id}')
             continue
+        
+        # Confirm in the console that user has been uploaded...
+        # Increment after upload is completed
+        print(f'Finished {count_of_uploaded_users} of {len(user_list)} users')
+        count_of_uploaded_users += 1
 
 if __name__ == '__main__':
     # If module is run by itself then run main
