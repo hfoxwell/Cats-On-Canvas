@@ -140,7 +140,7 @@ class POST_data_canvas(Canvas_connector):
             # Exit the application
             write_error("CANVAS: File upload Failed")
             return False
-        
+
         # Get file ID From canvas
         if 'id' in confirmation.json():
             # If file ID is found then set it for the image
@@ -169,25 +169,36 @@ class POST_data_canvas(Canvas_connector):
             params=self.params
             )
 
-        print(avatar_options.text)
-
-        # For each of the avatar options. put all the 
+        # As there are multiple avatars that come stock with canvas
+        # the program needs to iterate through the avatars to find 
+        # the image that was uploaded. 
         for avatar_opts in avatar_options.json():
-
-            print(avatar_opts)
-
+            
+            # If the current avatar has the same name as the uploaded image
+            # Set params to be 'user[avatar][token] = <token>.
+            # The image token is unique to each request. So cannot be 
+            # relied on between sessions.
             if avatar_opts.get('display_name') == user.image.image_name:
                 self.params['user[avatar][token]'] = avatar_opts.get('token')
 
+            # Create put request to tell canvas to update pfp
+            # This is done as a put to prevent POST from regenerating 
+            # outputs
             set_avatar_user = requests.put(
                 f'{self.domain}/users/{user.client_id}',
                 headers=self.header,
                 params=self.params
             )
-            if set_avatar_user.status_code == 200:
-                write_log(f'success updating user avatar for: {user.client_id}')
-                return True
-            else:
-                write_error(f'CANVAS: Error updating avatar for: {user.client_id}')
-                return False
+        
+        # If the canvas response is 200, then the update has been sucessful
+        if set_avatar_user.status_code == 200:
+            write_log(f'success updating user avatar for: {user.client_id}')
+            return True
+        else:
+            # If the update was not successful, log the result 
+            write_error(
+                f'CANVAS: Error updating avatar for: {user.client_id},' +
+                f' error: {set_avatar_user.status_code}'
+                )
+            return False
 
