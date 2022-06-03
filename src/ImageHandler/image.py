@@ -19,6 +19,7 @@ class image:
     image_path: str = field(compare=False)
     file_type:str = field(compare=False)
     image_size:int = field(init=False)
+    image_canvas_id:str = field(init=False)
 
     def __post_init__(self):
         self.image_size = os.path.getsize(f'{self.image_path}{self.image_name}')

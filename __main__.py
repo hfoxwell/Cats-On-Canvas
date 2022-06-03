@@ -131,8 +131,8 @@ def main():
     write_log(f'Creating canvas object...')
     
     # Create and initalise canvas connector
+    connector = POST_data_canvas(settings['access_token'], settings['domain'])
     try:
-        connector = POST_data_canvas(settings['access_token'], settings['domain'])
         #  Attempt to connect to canvas
         pass
     except:
@@ -145,21 +145,23 @@ def main():
     # For each user Start upload process
     for student in user_list:
         ''' For each student in user list upload data to canvas '''
+        
         #Step 0: Get canvas user ID via SIS ID
         if not connector.get_canvas_id(student):
             # If connector cannot get user id skip user
             write_log(f"CANVAS: Skipping user: {student.client_id}")
             continue
-        print(student.client_id)
 
         # Step 1: Start upload file to user's file storage
-        connector.upload_user_data(student)
-        # Step 2: Upload Data
+        if not connector.upload_user_data(student):
+            # if no upload happened log and next student
+            write_log(f'CANVAS: Skipping user: {student.client_id} File could not be uploaded')
+            continue
 
-        # Step 3: Confirm Upload
-
-        # Step 4: Make API call to set avatar image
-    pass
+        # Step 2: Make API call to set avatar image
+        if not connector.set_image_as_avatar(student):
+            write_error(f'CANVAS: Error changing profile picture for: {student.client_id}')
+            continue
 
 if __name__ == '__main__':
     # If module is run by itself then run main

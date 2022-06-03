@@ -8,6 +8,8 @@
 
 # External imports
 from abc import ABC, abstractmethod
+from asyncore import write
+import re
 import requests, json, collections
 
 # Internal imports
@@ -60,35 +62,38 @@ class Canvas_connector(ABC):
     def upload_user_data(self, user:client) -> bool:
         ''' Uploads user data to canvas. Returns bool (true) on success'''
 
+    @abstractmethod
+    def set_image_as_avatar(self, user: client) -> bool:
+        ''' Sets and image to be a users PFP'''
+
 class POST_data_canvas(Canvas_connector):
     
     def __init__(self, Token: str, domain:str) -> None:
         ''' For passing information to canvas '''
         super().__init__(Token, domain)
-        
-        # settings = json.load(open(file='./Settings/settings.json', encoding='utf-8'))
-        # Auth_token: str = settings['access_token']
-        # domain: str = f'https://{settings["domain"]}/api/v1/users'
-        # header: str = ""
-        # params: tuple = {}
     
     def get_canvas_id(self, user:client) -> bool:
         ''' Gets a user ID from Canvas '''
-        
+        # Write log with user ID
         write_log(
             f'USER: Getting Canvas ID for: {user.client_id}'
         )
 
+        # Send get request for a user's canvas id. This is 
+        # different from their SIS id
         user_Details = requests.get(
             f'{self.domain}/users/sis_user_id:{user.client_id}',
             headers=self.header,
             params=self.params
         )
 
+        # Check if id is in the json response.
         if 'id' in user_Details.json():
+            # User ID found then change the users SIS id to match
             user.client_id = user_Details.json()['id']
             return True
         else:
+            # If not found, return an error to the log with the SIS id
             write_error(f'USER: {user.client_id} cannot be found in canvas')
             return False
 
@@ -110,28 +115,79 @@ class POST_data_canvas(Canvas_connector):
         # # Get response and send data
         json_res = json.loads(response.text)
 
-        # # Prepare data
+        # Prepare data
+        # Get file data from image object
         files = {'file' : user.image.image_file}
 
-        _data = json_res.items()
-
+        # Set the params to the params based on the response from canvas
+        # These must be identical to the params recieved from canvas. 
+        # Else this will fail
         self.params = json_res['upload_params']
-        # _data[1] = ('upload_params',_data[1][1].items())
 
         # Send the file to canvas
+        # Get upload confirmation
         upload_file_response = requests.post(json_res['upload_url'],data=self.params,files=files,allow_redirects=False)
+        status_code: int = upload_file_response.status_code
 
-        # Testing
-        print(upload_file_response, upload_file_response.text)
-        if upload_file_response.status_code >= 301:
-            # Post to confirm upload
-            pass
-        elif upload_file_response.status_code == 200:
-            # Upload completed
-            pass
+        # The response from canvas can either be 201 or 3XX
+        # A 300+ response requires a confirmation from the app
+        # A 201 is a confrimation and a get will return the file id
+        if status_code == 201 or status_code >= 300:
+            # Get file upload confirmation and file ID
+            confirmation = requests.get(upload_file_response.headers['location'],headers=self.header)
         else:
-            # Upload has failed
-            pass
+            # If another value returns then there was an issue
+            # Exit the application
+            write_error("CANVAS: File upload Failed")
+            return False
+        
+        # Get file ID From canvas
+        if 'id' in confirmation.json():
+            # If file ID is found then set it for the image
+            user.image.image_canvas_id = confirmation.json()['id'] 
+        else:
+            write_error('CANVAS: No file ID found for uploaded file')
 
-    
+        # Successfully uploaded file
+        return True
+
+    def set_image_as_avatar(self, user: client) -> bool:
+        ''' Sets and image to be a users PFP'''
+
+        # Log that Canvas avatar is being updated
+        write_log(
+            f'Setting canvas Avatar for: {user.client_id} To: {user.image.image_name}'
+            )
+        
+        # Set parameters as the user_id
+        self.params = { 'as_user_id':f'{user.client_id}'}
+
+        # Get-Request the user avatars images, to get image id
+        avatar_options = requests.get(
+            f'{self.domain}/users/{user.client_id}/avatars',
+            headers=self.header,
+            params=self.params
+            )
+
+        print(avatar_options.text)
+
+        # For each of the avatar options. put all the 
+        for avatar_opts in avatar_options.json():
+
+            print(avatar_opts)
+
+            if avatar_opts.get('display_name') == user.image.image_name:
+                self.params['user[avatar][token]'] = avatar_opts.get('token')
+
+            set_avatar_user = requests.put(
+                f'{self.domain}/users/{user.client_id}',
+                headers=self.header,
+                params=self.params
+            )
+            if set_avatar_user.status_code == 200:
+                write_log(f'success updating user avatar for: {user.client_id}')
+                return True
+            else:
+                write_error(f'CANVAS: Error updating avatar for: {user.client_id}')
+                return False
 
