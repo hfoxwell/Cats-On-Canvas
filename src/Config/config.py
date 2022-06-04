@@ -9,7 +9,12 @@
 # External imports
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-import yaml
+
+try:
+    import yaml
+except ImportError:
+    print("YAML can't be loaded importing json")
+    import json
 
 # Internal Imports
 
@@ -40,12 +45,32 @@ class Settings_parser(ABC):
         self.settings_dir: str = directory
 
     @abstractmethod
-    def read_file(self):
+    def read_file(self) -> bool:
         ''' Read the file '''
 
     @abstractmethod
-    def load_config(self, config:config):
+    def load_config(self, config:config) -> config:
         ''' Load config with data'''
 
+class json_parser(Settings_parser):
+    '''Parses json settings'''
+    def __init__(self, filename: str, directory: str) -> None:
+        super().__init__(filename, directory)
 
+    def read_file(self) -> bool:
+        return super().read_file()
 
+    def load_config(self, config: config) -> config:
+        return super().load_config(config)
+
+class yaml_parser(Settings_parser):
+    '''Parses yaml settings'''
+
+    def __init__(self, filename: str, directory: str) -> None:
+        super().__init__(filename, directory)
+
+    def read_file(self) -> bool:
+        return super().read_file()
+
+    def load_config(self, config: config) -> config:
+        return super().load_config(config)
