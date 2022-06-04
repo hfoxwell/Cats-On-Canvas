@@ -8,9 +8,7 @@
 
 # External imports
 from abc import ABC, abstractmethod
-from asyncore import write
-import re
-import requests, json, collections
+import requests, json
 
 # Internal imports
 from src.Clients.user import client
@@ -22,7 +20,6 @@ class Canvas_connector(ABC):
     
     def __init__(self, Token: str, domain:str) -> None:
         ''' Initalise a connector'''
-        #self.settings = json.load(open(file='./Settings/settings.json', encoding='utf-8'))
         self.Auth_token: str = Token
         self.domain: str = f'https://{domain}/api/v1'
         self.header: tuple = {'Authorization' : f'Bearer {self.Auth_token}'}

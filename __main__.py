@@ -7,8 +7,7 @@
 '''
 
 # External imports
-from asyncio.proactor_events import _ProactorDuplexPipeTransport
-import json, os, sys
+import os, sys
 
 # Internal imports
 from src.ImageHandler.image_handler import open_image
@@ -139,14 +138,15 @@ def main():
     #######################################
     # Initalise settings for the program
     #######################################
-    ## TODO: This try block is going to catch all errors and not 
-    # Determine what the file type is...
-    #
     
     conf_parser: Settings_parser = json_parser(config)
     conf_parser.read_file(open(file='./Settings/settings.json', encoding='utf-8'))
     settings: config = conf_parser.load_config()
     
+    #########################################
+    # Verify that directories exist
+    #########################################
+
     # Check that files and directories exist
     if not(check_directories(
         settings.working_path,
@@ -164,6 +164,7 @@ def main():
     ######################################
     # Create CSV reader
     ######################################
+    
     file_reader: reader.Reader = reader.csv_reader(f'{settings.csv_directory}{settings.csv_filename}')
     list_of_clients = file_reader.get_clients()
 

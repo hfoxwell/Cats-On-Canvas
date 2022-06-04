@@ -17,7 +17,6 @@ except ImportError:
     import json
 
 # Internal Imports
-from src.Logger.log import write_error, write_log
 
 # Classes
 @dataclass()
@@ -54,8 +53,6 @@ class Settings_parser(ABC):
     def load_config(self) -> config:
         ''' Load config with data'''
 
-
-
 class json_parser(Settings_parser):
     '''Parses json settings'''
     
@@ -91,9 +88,6 @@ class json_parser(Settings_parser):
         )
     
         return conf
-        
-
-
 
 class yaml_parser(Settings_parser):
     '''Parses yaml settings'''

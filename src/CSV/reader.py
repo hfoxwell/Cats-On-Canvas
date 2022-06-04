@@ -10,7 +10,13 @@ from abc import ABC, abstractmethod
 import csv
 
 # Internal Imports
-from src.File.sourceFile import *
+from src.File.sourceFile import csv_Source
+
+##########
+'''
+    TODO: This needs to be Dependancy injected. It currently is too coupled on CSV_source
+'''
+##########
 
 #File Class
 class Reader(ABC):
