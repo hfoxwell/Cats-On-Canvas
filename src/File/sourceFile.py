@@ -7,7 +7,6 @@
 
 # Extrnal imports
 from abc import ABC,abstractmethod
-from mimetypes import init
 
 # Internal imports
 

@@ -7,7 +7,8 @@
 '''
 
 # External imports
-import json, os
+from asyncio.proactor_events import _ProactorDuplexPipeTransport
+import json, os, sys
 
 # Internal imports
 from src.ImageHandler.image_handler import open_image
@@ -15,6 +16,10 @@ from src.Clients.user import client
 from src.Logger.log import write_log, write_error
 from src.CSV import reader
 from src.Requests.canvas_requests import POST_data_canvas
+from src.Config.config import config, Settings_parser, json_parser, yaml_parser
+
+# Assert python minimum version
+assert sys.version_info >= (3,7)
 
 def check_directories(*directories ) -> bool:
     ''' 
@@ -33,10 +38,10 @@ def check_directories(*directories ) -> bool:
     # If all directories exist return true
     return True
 
-def Create_student_list(client_list:list, img_location:str) -> list:
+def Create_student_list(client_list: list[client], img_location:str) -> list[client]:
     ''' Returns a list of user objects'''
     # Variables
-    userList: list = []
+    userList: list[client] = []
     
     # Iterate through list from Csv
     for student in client_list:
@@ -107,25 +112,28 @@ def main():
     ''' Main function for controlling application flow'''
     # Variables
    
-    list_of_clients: list = []
+    list_of_clients: list[client] = []
 
     #######################################
     # Initalise settings for the program
     #######################################
-    try:
-        # Open json file for settings
-        settings = json.load(open(file='./Settings/settings.json', encoding='utf-8'))
+    ## TODO: This try block is going to catch all errors and not 
+    # Determine what the file type is...
+    #
     
-    except:
-        print("Error reading settings file! Please ensure file exists and is valid!")
-        return
+    conf_parser: Settings_parser = json_parser(config)
+    conf_parser.read_file(open(file='./Settings/settings.json', encoding='utf-8'))
+    settings: config = conf_parser.load_config()
     
     # Check that files and directories exist
     if not(check_directories(
-        settings['working_path'], 
-        settings['csv_filename'],
-        settings['images_path']
+        settings.working_path,
+        settings.log_filename,
+        settings.images_path,
+        settings.csv_directory,
+        f'{settings.csv_directory}{settings.csv_filename}'
         )):
+        # If directories don't exist then warn user
         print('Program cannot continue due to fatal error processing files')
         return
 
@@ -134,7 +142,7 @@ def main():
     ######################################
     # Create CSV reader
     ######################################
-    file_reader: reader.Reader = reader.csv_reader(settings['csv_filename'])
+    file_reader: reader.Reader = reader.csv_reader(settings.csv_filename)
     list_of_clients = file_reader.get_clients()
 
     ######################################
@@ -144,7 +152,7 @@ def main():
     # log details and create a user object
     user_list = Create_student_list(
         list_of_clients,
-        settings['images_path']
+        settings.images_path
         )
 
     # Now that users have been created upload them to canvas
