@@ -7,6 +7,7 @@
 '''
 
 # External imports
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import yaml
 
@@ -30,18 +31,19 @@ class config():
     csv_filename: str
 
 
-class Settings_parser():
-    '''Parse the settings'''
+
+class Settings_parser(ABC):
+    '''Base class for parsing settings to an object'''
 
     def __init__(self, filename:str, directory: str ) -> None:
         self.settings_name: str = filename
         self.settings_dir: str = directory
 
+    @abstractmethod
     def read_file(self):
         ''' Read the file '''
-        with open(f'{self.settings_dir}{self.settings_name}', 'r') as ymlfile:
-            cfg = yaml.load(ymlfile)
 
+    @abstractmethod
     def load_config(self, config:config):
         ''' Load config with data'''
 
