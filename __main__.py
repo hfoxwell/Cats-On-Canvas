@@ -21,6 +21,9 @@ from src.Config.config import config, Settings_parser, json_parser, yaml_parser
 # Assert python minimum version
 assert sys.version_info >= (3,7)
 
+##############################
+# FUNCTIONS
+##############################
 def check_directories(*directories ) -> bool:
     ''' 
     Make sure that CSV and images directories exist.
@@ -107,6 +110,25 @@ def Create_student_list(client_list: list[client], img_location:str) -> list[cli
     # Return list of user objects
     return userList
 
+def process_user(user: client, connector: POST_data_canvas):
+    ''' upload a user to canvas '''
+    #Step 0: Get canvas user ID via SIS ID
+    if not connector.get_canvas_id(user):
+        # If connector cannot get user id skip user
+        write_log(f"CANVAS: Skipping user: {user.client_id}")
+        return
+
+    # Step 1: Start upload file to user's file storage
+    if not connector.upload_user_data(user):
+        # if no upload happened log and next student
+        write_log(f'CANVAS: Skipping user: {user.client_id} File could not be uploaded')
+        return
+
+    # Step 2: Make API call to set avatar image
+    if not connector.set_image_as_avatar(user):
+        write_error(f'CANVAS: Error changing profile picture for: {user.client_id}')
+        return
+
 # Main function
 def main():
     ''' Main function for controlling application flow'''
@@ -142,7 +164,7 @@ def main():
     ######################################
     # Create CSV reader
     ######################################
-    file_reader: reader.Reader = reader.csv_reader(settings.csv_filename)
+    file_reader: reader.Reader = reader.csv_reader(f'{settings.csv_directory}{settings.csv_filename}')
     list_of_clients = file_reader.get_clients()
 
     ######################################
@@ -170,7 +192,7 @@ def main():
     #########################################
     try:
         #  Attempt to connect to canvas
-        connector = POST_data_canvas(settings['access_token'], settings['domain'])
+        connector = POST_data_canvas(settings.access_token, settings.domain)
         pass
     except:
         # If error is reported in connecting to canvas
@@ -186,22 +208,8 @@ def main():
     for user in user_list:
         ''' For each student in user list upload data to canvas '''
         
-        #Step 0: Get canvas user ID via SIS ID
-        if not connector.get_canvas_id(user):
-            # If connector cannot get user id skip user
-            write_log(f"CANVAS: Skipping user: {user.client_id}")
-            continue
-
-        # Step 1: Start upload file to user's file storage
-        if not connector.upload_user_data(user):
-            # if no upload happened log and next student
-            write_log(f'CANVAS: Skipping user: {user.client_id} File could not be uploaded')
-            continue
-
-        # Step 2: Make API call to set avatar image
-        if not connector.set_image_as_avatar(user):
-            write_error(f'CANVAS: Error changing profile picture for: {user.client_id}')
-            continue
+        # Call function to process a user
+        process_user(user, connector)
         
         # Confirm in the console that user has been uploaded...
         # Increment after upload is completed
