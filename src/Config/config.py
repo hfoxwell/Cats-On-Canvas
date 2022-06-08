@@ -10,8 +10,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from Clients.user import client
-
 try:
     import yaml
 except ImportError:
@@ -96,17 +94,12 @@ class yaml_parser(Settings_parser):
         super().__init__(config)
 
     def read_file(self, settings_file) -> bool:
-        try:
-            self.Settings_contents = yaml.load(settings_file)
-        
-        except KeyError:
-            print(KeyError("Key missing from yaml file"))
-            return False
+        raise NotImplementedError("This is not implemented yet.")
 
-        return True
 
     def load_config(self) -> config:
         ''' load a config'''
+        raise NotImplementedError("this is not implemented yet.")
         pass
 
 

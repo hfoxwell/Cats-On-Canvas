@@ -23,6 +23,35 @@ assert sys.version_info >= (3,7)
 ##############################
 # FUNCTIONS
 ##############################
+def get_settings(dir: str):
+    ''' Load the settings object '''
+    
+    # Variables
+    settings_fileList: list[str] = os.listdir(dir)
+
+    # for all files in the directory
+    #   check each file for json or yaml
+    for setting_file in settings_fileList:
+        # Deterimine the settings file format
+        if ".json" in setting_file:
+            # if settings is json format create json parser
+            factory = json_factory()
+            break
+
+        else:
+            # if settings is yaml format create yaml parser
+            factory = yaml_factory()
+            break
+
+    # Create new parser from the instasiated factory
+    conf_parser = factory.create_parser()
+
+    # read the settings file using the new parser
+    conf_parser.read_file(open(file=f'./Settings/{settings_fileList[0]}', encoding='utf-8'))
+    
+    # return the config objec to the program
+    return conf_parser.load_config()
+
 def check_directories(*directories ) -> bool:
     ''' 
     Make sure that CSV and images directories exist.
@@ -138,13 +167,8 @@ def main():
     #######################################
     # Initalise settings for the program
     #######################################
-    if "json" in os.listdir('./Settings/'):
-        conf_parser = json_factory.create_parser()
-    else:
-        conf_parser = yaml_factory.create_parser()
-
-    conf_parser.read_file(open(file='./Settings/settings.json', encoding='utf-8'))
-    settings = conf_parser.load_config()
+    # Get the settings config from the file
+    settings = get_settings('Settings/')
     
     #########################################
     # Verify that directories exist
