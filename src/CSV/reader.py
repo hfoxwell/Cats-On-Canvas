@@ -30,8 +30,10 @@ class Reader(ABC):
        ''' Returns list of clients from file'''
 
 class csv_reader(Reader):
+    ''' read CSV files '''
 
     def __init__(self, src: str) -> None:
+        ''' Initalise a reader with a source '''
         self.source_file = csv_Source(src).file
 
     def get_clients(self) -> list:
