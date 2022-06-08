@@ -10,6 +10,8 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
+from Clients.user import client
+
 try:
     import yaml
 except ImportError:
@@ -34,8 +36,6 @@ class config():
     # File settings
     log_filename: str
     csv_filename: str
-
-
 
 class Settings_parser(ABC):
     '''Base class for parsing settings to an object'''
@@ -106,4 +106,25 @@ class yaml_parser(Settings_parser):
         return True
 
     def load_config(self) -> config:
-        return super().load_config(config)
+        ''' load a config'''
+        pass
+
+
+# Factories
+class abstract_settings_factory(ABC):
+    ''' Abstract factory class '''
+    @abstractmethod
+    def create_parser(self) -> Settings_parser:
+        ''' Create a parser '''
+
+class json_factory(abstract_settings_factory):
+    ''' Returns a json parser '''
+    
+    def create_parser(self) -> Settings_parser:
+        return json_parser(config)
+
+class yaml_factory(abstract_settings_factory):
+    ''' returns a yaml parser'''
+
+    def create_parser(self) -> Settings_parser:
+        return yaml_parser(config)

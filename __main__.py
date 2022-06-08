@@ -11,11 +11,11 @@ import os, sys
 
 # Internal imports
 from src.ImageHandler.image_handler import open_image
-from src.Clients.user import client
 from src.Logger.log import write_log, write_error
 from src.CSV import reader
+from src.Clients.user import client
 from src.Requests.canvas_requests import POST_data_canvas
-from src.Config.config import config, Settings_parser, json_parser, yaml_parser
+from src.Config.config import yaml_factory, json_factory
 
 # Assert python minimum version
 assert sys.version_info >= (3,7)
@@ -138,10 +138,13 @@ def main():
     #######################################
     # Initalise settings for the program
     #######################################
-    
-    conf_parser: Settings_parser = json_parser(config)
+    if "json" in os.listdir('./Settings/'):
+        conf_parser = json_factory.create_parser()
+    else:
+        conf_parser = yaml_factory.create_parser()
+
     conf_parser.read_file(open(file='./Settings/settings.json', encoding='utf-8'))
-    settings: config = conf_parser.load_config()
+    settings = conf_parser.load_config()
     
     #########################################
     # Verify that directories exist
