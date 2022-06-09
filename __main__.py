@@ -11,14 +11,14 @@ import os, sys
 
 # Internal imports
 from src.ImageHandler.image_handler import open_image
-from src.Logger.log import write_log, write_error
+from src.Logger import log
 from src.CSV import reader
 from src.Clients.user import client
 from src.Requests.canvas_requests import POST_data_canvas
-from src.Config.config import yaml_factory, json_factory
+from src.Config import config
 
 # Assert python minimum version
-assert sys.version_info >= (3,7)
+assert sys.version_info >= (3,8)
 
 ##############################
 # FUNCTIONS
@@ -35,12 +35,12 @@ def get_settings(dir: str):
         # Deterimine the settings file format
         if ".json" in setting_file:
             # if settings is json format create json parser
-            factory = json_factory()
+            factory = config.json_factory()
             break
 
         else:
             # if settings is yaml format create yaml parser
-            factory = yaml_factory()
+            factory = config.yaml_factory()
             break
 
     # Create new parser from the instasiated factory
@@ -61,10 +61,10 @@ def check_directories(*directories ) -> bool:
     # Check if they exist
     for arg in directories:
         if not(os.path.exists(arg)):
-            write_error(FileNotFoundError(f'FILE: File or directory MISSING: {arg}'))
+            log.write_error(FileNotFoundError(f'FILE: File or directory MISSING: {arg}'))
             return False
         else:
-            write_log(f'File: "{arg}" found.')
+            log.write_log(f'File: "{arg}" found.')
     
     # If all directories exist return true
     return True
@@ -87,7 +87,7 @@ def Create_student_list(client_list: list[client], img_location:str) -> list[cli
         some controllers. 
         '''
         
-        write_log(f'Current Student: {student}')
+        log.write_log(f'Current Student: {student}')
 
         # confirm user's image exists in directory
         img = open_image(
@@ -97,8 +97,8 @@ def Create_student_list(client_list: list[client], img_location:str) -> list[cli
         # Check if image is null
         # If image is null, no image exists so raise error
         if img == None:
-            write_error(FileNotFoundError(f'FILE: {student["image_filename"]} cannot be found'))
-            write_log(f'USER: user, {student["client_id"]} Skipped as no image could be found')
+            log.write_error(FileNotFoundError(f'FILE: {student["image_filename"]} cannot be found'))
+            log.write_log(f'USER: user, {student["client_id"]} Skipped as no image could be found')
             continue
         else:
             # Create user object
@@ -110,7 +110,7 @@ def Create_student_list(client_list: list[client], img_location:str) -> list[cli
             except:
                 # Catch error creating user
                 # Write this to log
-                write_error(Exception(f'USER: Could not create user {student["client_id"]}'))
+                log.write_error(Exception(f'USER: Could not create user {student["client_id"]}'))
                 continue
 
         ###################
@@ -128,7 +128,7 @@ def Create_student_list(client_list: list[client], img_location:str) -> list[cli
     ###############################
     # Console & log Number of users
     ###############################
-    write_log(
+    log.write_log(
         f'Total of {len(userList)} users created'
     )
     print(
@@ -143,18 +143,18 @@ def process_user(user: client, connector: POST_data_canvas):
     #Step 0: Get canvas user ID via SIS ID
     if not connector.get_canvas_id(user):
         # If connector cannot get user id skip user
-        write_log(f"CANVAS: Skipping user: {user.client_id}")
+        log.write_log(f"CANVAS: Skipping user: {user.client_id}")
         return
 
     # Step 1: Start upload file to user's file storage
     if not connector.upload_user_data(user):
         # if no upload happened log and next student
-        write_log(f'CANVAS: Skipping user: {user.client_id} File could not be uploaded')
+        log.write_log(f'CANVAS: Skipping user: {user.client_id} File could not be uploaded')
         return
 
     # Step 2: Make API call to set avatar image
     if not connector.set_image_as_avatar(user):
-        write_error(f'CANVAS: Error changing profile picture for: {user.client_id}')
+        log.write_error(f'CANVAS: Error changing profile picture for: {user.client_id}')
         return
 
 # Main function
@@ -169,7 +169,15 @@ def main():
     #######################################
     # Get the settings config from the file
     settings = get_settings('Settings/')
-    
+
+    #######################################
+    # Initalise the log
+    #######################################
+    log.create_Log(
+        f'{settings.working_path}{settings.log_filename}',
+         settings.log_filename
+         )
+
     #########################################
     # Verify that directories exist
     #########################################
@@ -186,7 +194,7 @@ def main():
         print('Program cannot continue due to fatal error processing files')
         return
 
-    write_log("File: Checks Complete. Starting Client Generation")
+    log.write_log("File: Checks Complete. Starting Client Generation")
 
     ######################################
     # Create CSV reader
@@ -208,11 +216,11 @@ def main():
     # Now that users have been created upload them to canvas
     # if no users have been created. Then EXIT the program
     if (len(user_list)):
-        write_log(f'All possible users have been created. A total of {len(user_list)}')
-        write_log(f'Creating canvas object...')
+        log.write_log(f'All possible users have been created. A total of {len(user_list)}')
+        log.write_log(f'Creating canvas object...')
     else:
         print("No users were created. Closing application")
-        write_error("USER: no users were found. Exiting..")
+        log.write_error("USER: no users were found. Exiting..")
         exit()
     
     #########################################
@@ -224,10 +232,10 @@ def main():
         pass
     except:
         # If error is reported in connecting to canvas
-        write_error(Exception(f'CONNECTOR: Error connecting to canvas. Exiting application.'))
+        log.write_error(Exception(f'CONNECTOR: Error connecting to canvas. Exiting application.'))
         print(Exception('Error connecting to canvas, Quitting application'))
         exit()
-    write_log("Successfully created canvas connection. Commencing upload.")
+    log.write_log("Successfully created canvas connection. Commencing upload.")
     
     ########################################
     # For each user Start upload process
