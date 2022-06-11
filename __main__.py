@@ -11,7 +11,7 @@ import os, sys
 
 # Internal imports
 from src.ImageHandler.image_handler import open_image
-from src.Logger import log
+from src.Logger.log import logger
 from src.CSV import reader
 from src.Clients.user import client
 from src.Requests.canvas_requests import POST_data_canvas
@@ -173,10 +173,7 @@ def main():
     #######################################
     # Initalise the log
     #######################################
-    log.create_Log(
-        f'{settings.working_path}{settings.log_filename}',
-         settings.log_filename
-         )
+    log : logger = logger(settings)
 
     #########################################
     # Verify that directories exist

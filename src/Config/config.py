@@ -10,8 +10,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from yaml import YAMLError
-
 try:
     import yaml
 except ImportError:
@@ -103,7 +101,7 @@ class yaml_parser(Settings_parser):
             # Read the yaml file
             self.Settings_contents = yaml.safe_load(settings_file)
 
-        except YAMLError as exc:
+        except yaml.YAMLError as exc:
             # if the error contains problem mark then identify where the error was
             if hasattr(exc, 'problem_mark'):
                 # Get the prblem mark
