@@ -9,7 +9,7 @@ from datetime import datetime
 import os
 
 # internal imports
-from Config.config import config
+from src.Config.config import config
 
 # Class for file
 class logger:
