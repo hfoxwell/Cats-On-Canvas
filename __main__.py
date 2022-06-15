@@ -256,4 +256,5 @@ class main():
 
 if __name__ == '__main__':
     # If module is run by itself then run main
+    main = main()
     main.main()
