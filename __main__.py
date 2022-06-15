@@ -15,7 +15,7 @@ from src.Logger.log import logger
 from src.CSV import reader
 from src.Clients.user import client
 from src.Requests.canvas_requests import POST_data_canvas
-from src.Config.config import config
+from src.Config import config
 
 # Assert python minimum version
 assert sys.version_info >= (3,8)
@@ -43,16 +43,18 @@ class main():
                 factory = config.json_factory()
                 break
 
-            else:
-                # if settings is yaml format create yaml parser
-                factory = config.yaml_factory()
-                break
+        if factory is None:
+            # if settings is yaml format create yaml parser
+            factory = config.yaml_factory()
 
         # Create new parser from the instasiated factory
         conf_parser = factory.create_parser()
 
         # read the settings file using the new parser
-        conf_parser.read_file(open(file=f'./Settings/{settings_fileList[0]}', encoding='utf-8'))
+        with open(file=f'./Settings/{settings_fileList[0]}') as settingsFile:
+            if not(conf_parser.read_file(settingsFile)):
+                print('Failed to load settings: Exiting application')
+                exit()
         
         # return the config objec to the program
         return conf_parser.load_config()
@@ -178,7 +180,7 @@ class main():
         #######################################
         # Initalise the log
         #######################################
-        self.log : logger = logger(self.settings)
+        self.log = logger(self.settings)
 
         #########################################
         # Verify that directories exist
@@ -202,8 +204,8 @@ class main():
         # Create CSV reader
         ######################################
         
-        file_reader: reader.Reader = reader.csv_reader(f'{self.settings.csv_directory}{self.settings.csv_filename}', self.log)
-        list_of_clients = file_reader.get_clients(self.log)
+        file_reader: reader.Reader = reader.csv_reader(f'{self.settings.csv_directory}{self.settings.csv_filename}')
+        list_of_clients = file_reader.get_clients()
 
         ######################################
         # Create users

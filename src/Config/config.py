@@ -65,8 +65,9 @@ class json_parser(Settings_parser):
             self.settings_contents = json.load(settings_file)
         
         # If decode of json file fails catch error and report
-        except json.decoder.JSONDecodeError:
-            print(json.decoder.JSONDecodeError('There was an error decoding the json file'))
+        except Exception as e:
+            print(e)
+            print('An issue occured with the settings.json')
             return False
         
         # On success. Return true
