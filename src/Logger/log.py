@@ -49,7 +49,6 @@ class logger:
             print(f'Error creating/accessing log file {self.log_file_name}, Error: {e}')
             exit()
 
-    @staticmethod
     def write_log(self, *content) -> bool:
         ''' Writes to the log file automatically appends time'''
         try:
