@@ -10,7 +10,13 @@ from abc import ABC, abstractmethod
 import csv
 
 # Internal Imports
-from src.File.sourceFile import *
+from src.File.sourceFile import csv_Source
+
+##########
+'''
+    TODO: This needs to be Dependancy injected. It currently is too coupled on CSV_source
+'''
+##########
 
 #File Class
 class Reader(ABC):
@@ -24,8 +30,10 @@ class Reader(ABC):
        ''' Returns list of clients from file'''
 
 class csv_reader(Reader):
+    ''' read CSV files '''
 
     def __init__(self, src: str) -> None:
+        ''' Initalise a reader with a source '''
         self.source_file = csv_Source(src).file
 
     def get_clients(self) -> list:

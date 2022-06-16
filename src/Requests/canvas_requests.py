@@ -8,28 +8,28 @@
 
 # External imports
 from abc import ABC, abstractmethod
-from asyncore import write
-import re
-import requests, json, collections
+import requests, json
 
 # Internal imports
 from src.Clients.user import client
-from src.Logger.log import write_error, write_log
+from src.Logger.log import logger
 
 
 class Canvas_connector(ABC):
     '''Abstract base class for canvas connector'''
     
-    def __init__(self, Token: str, domain:str) -> None:
+    def __init__(self, Token: str, domain:str, logInstance: logger) -> None:
         ''' Initalise a connector'''
-        #self.settings = json.load(open(file='./Settings/settings.json', encoding='utf-8'))
         self.Auth_token: str = Token
         self.domain: str = f'https://{domain}/api/v1'
         self.header: tuple = {'Authorization' : f'Bearer {self.Auth_token}'}
         self.params: tuple = {}
 
+        # Logger instance
+        self.log: logger = logInstance
+
         # Log initalised values
-        write_log(
+        self.log.write_log(
             f'CANVAS: initalised values:',
             f'Auth Token:\t {self.Auth_token}',
             f'Domain:\t {self.domain}',
@@ -47,11 +47,11 @@ class Canvas_connector(ABC):
         res = requests.get(f'{self.domain}/accounts',self.params,headers=self.header)
         if res.status_code == desired_result:
             # If result 200 then return true
-            write_log("CANVAS: Connection Successfully Tested")
+            self.log.write_log("CANVAS: Connection Successfully Tested")
             return True
         else:
             # If other result recieved return false
-            write_error(ConnectionRefusedError(f"Canvas Refused the connection: {res.status_code}"))
+            self.log.write_error(ConnectionRefusedError(f"Canvas Refused the connection: {res.status_code}"))
             raise ConnectionRefusedError("Canvas Refused the connection") 
 
     @abstractmethod
@@ -75,7 +75,7 @@ class POST_data_canvas(Canvas_connector):
     def get_canvas_id(self, user:client) -> bool:
         ''' Gets a user ID from Canvas '''
         # Write log with user ID
-        write_log(
+        self.log.write_log(
             f'USER: Getting Canvas ID for: {user.client_id}'
         )
 
@@ -94,7 +94,7 @@ class POST_data_canvas(Canvas_connector):
             return True
         else:
             # If not found, return an error to the log with the SIS id
-            write_error(f'USER: {user.client_id} cannot be found in canvas')
+            self.log.write_error(f'USER: {user.client_id} cannot be found in canvas')
             return False
 
     def upload_user_data(self, user: client) -> bool:
@@ -138,7 +138,7 @@ class POST_data_canvas(Canvas_connector):
         else:
             # If another value returns then there was an issue
             # Exit the application
-            write_error("CANVAS: File upload Failed")
+            self.log.write_error("CANVAS: File upload Failed")
             return False
 
         # Get file ID From canvas
@@ -146,7 +146,7 @@ class POST_data_canvas(Canvas_connector):
             # If file ID is found then set it for the image
             user.image.image_canvas_id = confirmation.json()['id'] 
         else:
-            write_error('CANVAS: No file ID found for uploaded file')
+            self.log.write_error('CANVAS: No file ID found for uploaded file')
 
         # Successfully uploaded file
         return True
@@ -155,7 +155,7 @@ class POST_data_canvas(Canvas_connector):
         ''' Sets and image to be a users PFP'''
 
         # Log that Canvas avatar is being updated
-        write_log(
+        self.log.write_log(
             f'Setting canvas Avatar for: {user.client_id} To: {user.image.image_name}'
             )
         
@@ -192,11 +192,11 @@ class POST_data_canvas(Canvas_connector):
         
         # If the canvas response is 200, then the update has been sucessful
         if set_avatar_user.status_code == 200:
-            write_log(f'success updating user avatar for: {user.client_id}')
+            self.log.write_log(f'success updating user avatar for: {user.client_id}')
             return True
         else:
             # If the update was not successful, log the result 
-            write_error(
+            self.log.write_error(
                 f'CANVAS: Error updating avatar for: {user.client_id},' +
                 f' error: {set_avatar_user.status_code}'
                 )
