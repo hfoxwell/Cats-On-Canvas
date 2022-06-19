@@ -5,7 +5,7 @@
         Test creation of settings files
 '''
 # External imports
-from typing_extensions import assert_never
+import json
 import pytest
 from pytest import MonkeyPatch
 
@@ -48,22 +48,24 @@ def test_json_parser(monkeypatch: MonkeyPatch):
     assert jParser.configuration != None
     assert jParser.Settings_contents == None
 
-    def fake_json():
+    def fake_json(file):
         return {
             "working_path"      : "./",
             "access_token"      : "abcd1234",
             "domain"            : "test.instrudture.com",
             "csv_directory"     : "test_dir/",
-            "images_filepath"   : "test_dir2",
+            "images_path"   : "test_dir2",
             "csv_filename"      : "csv.csv",
             "log_filename"      : "log.txt"
         }
 
-    monkeypatch.setattr("json.load",fake_json)
+    monkeypatch.setattr("json.load", fake_json)
 
     # No error should be raised
     # read a mocked file input
-    jParser.read_file("test.file")
+    assert jParser.read_file("test.file") == True
+
+    assert jParser.settings_contents != None
 
     # Load the config file
     conf = jParser.load_config()

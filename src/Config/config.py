@@ -12,6 +12,7 @@ from dataclasses import dataclass
 
 try:
     import yaml
+    import json
 except ImportError:
     print("YAML can't be loaded importing json")
     import json
