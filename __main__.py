@@ -18,8 +18,16 @@ from src.Requests.canvas_requests import POST_data_canvas
 from src.Config import config
 
 # Assert python minimum version
-assert sys.version_info >= (3,8)
-
+try:
+    assert sys.version_info >= (3,9)
+except AssertionError as e:
+    print(
+        f'{"#" * 10} ERROR {"#" * 10}',
+        "The currently installed version of python is insufficent to run this program.",
+        f'CURRENT VERSION: {sys.version_info} is less than required Version: 3.9.x(major=3, minor=9, micro=0)',
+        sep='\n \t'
+        )
+    exit()
 ##############################
 # FUNCTIONS
 ##############################
