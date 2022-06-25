@@ -11,7 +11,7 @@ from pytest import MonkeyPatch
 
 # Internal import
 from src.Clients.user import client
-from src.ImageHandler import image
+from src.Image import image
 
 def test_client(monkeypatch: MonkeyPatch):
     ''' Test client Creation'''

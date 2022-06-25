@@ -10,7 +10,7 @@
 import os, sys
 
 # Internal imports
-from src.ImageHandler.image_handler import open_image
+from src.Image.image import imageFactory
 from src.Logger.log import logger
 from src.CSV import reader
 from src.Clients.user import client
@@ -19,8 +19,10 @@ from src.Config import config
 
 # Assert python minimum version
 try:
+    # Check python min version
     assert sys.version_info >= (3,9)
-except AssertionError as e:
+except AssertionError:
+    # Display error to user if triggered.
     print(
         f'{"#" * 10} ERROR {"#" * 10}',
         "The currently installed version of python is insufficent to run this program.",
@@ -28,6 +30,7 @@ except AssertionError as e:
         sep='\n \t'
         )
     exit()
+
 ##############################
 # FUNCTIONS
 ##############################
@@ -105,28 +108,26 @@ class main():
             self.log.write_log(f'Current Student: {student}')
 
             # confirm user's image exists in directory
-            img = open_image(
-                img_location,
-                student['image_filename']
-            )
-            # Check if image is null
-            # If image is null, no image exists so raise error
-            if img == None:
+            try:
+                # Create an image factory object and validate image creation.
+                imgFactory: imageFactory = imageFactory(img_location, student['image_filename'])
+            except OSError as e:
+                # if error raised by factory, image does not exits.
                 self.log.write_error(FileNotFoundError(f'FILE: {student["image_filename"]} cannot be found'))
                 self.log.write_log(f'USER: user, {student["client_id"]} Skipped as no image could be found')
                 continue
-            else:
-                # Create user object
-                try:
-                    user: client = client(
-                        student['client_id'], 
-                        img
-                        )
-                except:
-                    # Catch error creating user
-                    # Write this to log
-                    self.log.write_error(Exception(f'USER: Could not create user {student["client_id"]}'))
-                    continue
+            
+            # Create user object
+            try:
+                user: client = client(
+                    student['client_id'], 
+                    imgFactory.open_image()
+                    )
+            except:
+                # Catch error creating user
+                # Write this to log
+                self.log.write_error(Exception(f'USER: Could not create user {student["client_id"]}'))
+                continue
 
             ###################
             # Print out created user details
