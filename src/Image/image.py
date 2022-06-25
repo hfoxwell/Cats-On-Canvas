@@ -22,7 +22,11 @@ class image:
     image_canvas_id:str = field(init=False)
 
     def __post_init__(self):
-        self.image_size = os.path.getsize(f'{self.image_path}{self.image_name}')
+        imgSize = self.image_file.__sizeof__
+        print(imgSize)
+        imgSize = os.path.getsize(f'{self.image_path}{self.image_name}')
+        print(imgSize)
+        self.image_size = imgSize
 
 
 # File module

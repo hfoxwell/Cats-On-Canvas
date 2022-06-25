@@ -72,6 +72,7 @@ class json_parser(Settings_parser):
             return False
         
         # On success. Return true
+        print("SUCCESS: settings loaded")
         return True
 
     def load_config(self) -> config:
@@ -113,7 +114,7 @@ class yaml_parser(Settings_parser):
             # Indicate the failure of the function
             return False
         # If no error indicate function success
-        print(self.Settings_contents)
+        print("SUCCESS: Settings Loaded")
         return True
 
     def load_config(self) -> config:

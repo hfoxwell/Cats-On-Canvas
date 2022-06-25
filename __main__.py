@@ -44,6 +44,7 @@ class main():
         
         # Variables
         settings_fileList: list[str] = os.listdir(dir)
+        factory: config.abstract_settings_factory = None
 
         # for all files in the directory
         #   check each file for json or yaml
