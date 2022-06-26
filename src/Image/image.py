@@ -22,10 +22,10 @@ class image:
     image_canvas_id:str = field(init=False)
 
     def __post_init__(self):
-        imgSize = self.image_file.__sizeof__
-        print(imgSize)
-        imgSize = os.path.getsize(f'{self.image_path}{self.image_name}')
-        print(imgSize)
+        imgSize: int = (self.image_file.__sizeof__())
+        print(f'Bytes Size: {imgSize}')
+        # imgSize = os.path.getsize(f'{self.image_path}{self.image_name}')
+        # print(imgSize)
         self.image_size = imgSize
 
 
@@ -36,7 +36,7 @@ class imageFactory():
     def __init__(self, img_path: str, img_name: str) -> None:
         
         # Check that specified image exists
-        if (self.image_exists(img_path, img_name)):
+        if not(self.image_exists(img_path, img_name)):
             raise OSError("File not Found")
         
         self.image_path: str = img_path

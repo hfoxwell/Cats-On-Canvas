@@ -114,7 +114,7 @@ class main():
                 imgFactory: imageFactory = imageFactory(img_location, student['image_filename'])
             except OSError as e:
                 # if error raised by factory, image does not exits.
-                self.log.write_error(FileNotFoundError(f'FILE: {student["image_filename"]} cannot be found'))
+                self.log.write_error(FileNotFoundError(f'FILE: {e} {student["image_filename"]}'))
                 self.log.write_log(f'USER: user, {student["client_id"]} Skipped as no image could be found')
                 continue
             
