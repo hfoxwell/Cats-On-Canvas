@@ -124,10 +124,10 @@ class main():
                     student['client_id'], 
                     imgFactory.open_image()
                     )
-            except:
+            except Exception as userError:
                 # Catch error creating user
                 # Write this to log
-                self.log.write_error(Exception(f'USER: Could not create user {student["client_id"]}'))
+                self.log.write_error(f'USER: Could not create user {student["client_id"]} : {userError}')
                 continue
 
             ###################

@@ -16,6 +16,9 @@ from src.Image.image import image, imageFactory
 ##############
 # Tests
 ##############
+##
+# 1
+##
 
 def test_image():
     ''' Test the creation of a fake image object '''
@@ -34,6 +37,10 @@ def test_image():
     assert path == img.image_path
     assert filety == img.file_type
     assert img.image_size == (byte.__sizeof__())
+
+##
+# 2
+##
 
 def test_image_real():
     ''' Test with real image '''
@@ -55,6 +62,9 @@ def test_image_real():
     assert filety == img.file_type
     assert img.image_size == sizeBytes
 
+##
+# 3
+##
 
 def test_factory(monkeypatch: pytest.MonkeyPatch):
     ''' Create factory and test object '''

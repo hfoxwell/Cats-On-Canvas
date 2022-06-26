@@ -5,7 +5,7 @@
         Test the user class
 '''
 # External imports
-import pytest
+import pytest, random, string
 from pytest import MonkeyPatch
 
 
@@ -15,6 +15,9 @@ from src.Image import image
 
 def test_client(monkeypatch: MonkeyPatch):
     ''' Test client Creation'''
+    # Variables
+    user_ID: str = "".join(random.choices(string.ascii_letters + string.digits, k=10))
+
     # Provide function to patch image init
     def patch_image():
         return object()
@@ -23,16 +26,18 @@ def test_client(monkeypatch: MonkeyPatch):
     monkeypatch.setattr(image,'image',  patch_image)
 
     # Create new user
-    newuser = client(12345, image.image())
+    newuser = client(user_ID, image.image())
 
     # New user should not be null 
     #   and new user should have user id
     assert newuser != None
-    assert newuser.client_id == 12345
+    assert newuser.client_id == user_ID
 
 
 def test_no_client(monkeypatch: MonkeyPatch):
     ''' Test client failure'''
+
+    user_ID = ""                # Test empty client ID
     
     # Provide function to patch image init
     def patch_image():
@@ -42,4 +47,4 @@ def test_no_client(monkeypatch: MonkeyPatch):
     monkeypatch.setattr(image,'image',  patch_image)
 
     with pytest.raises(ValueError):
-        newuser = client("Hello", image.image())
+        newuser = client(user_ID, image.image())
