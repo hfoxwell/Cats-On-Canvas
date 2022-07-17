@@ -1,4 +1,4 @@
-# Canvas Avatar Updater
+# Canvas Avatar Updater ()
 
 This program will allow for the large scale updating of user avatars in Canvas. 
 Initally it will use a known list of students and their pre-populated images to 
@@ -10,8 +10,11 @@ This is outlined in the following segments:
 
 ### Contents
 1. CSV_FILE
-2. Images
-3. Operation
+2. Settings **
+3. Images
+4. Operation
+
+> ** Note Updates to settings change the functionality of the project. 
 
 ## CSV_File
 This is the file which is the source of all user (student) details, neccesary for the updating
@@ -56,11 +59,11 @@ classDiagram
 
     SASS_program --> Canvas : [User information, image_file]
 ```
-## Settings
+## Settings 
 
 To remove the need to edit the script. A settings file is used. This file is encoded in the Json format. This allows for simple use of 'tags' which denote the name of the setting with the value being assigned.
 
-#### Default state
+#### Default state ( Modified )
 The default state for the settings file as found in this repository is as follows:
 ``` json
 {

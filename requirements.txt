@@ -1,0 +1,39 @@
+# This file may be used to create an environment using:
+# $ conda create --name <env> --file <this file>
+# platform: osx-64
+attrs=21.4.0=pyhd3eb1b0_0
+brotlipy=0.7.0=py39h9ed2024_1003
+ca-certificates=2022.4.26=hecd8cb5_0
+certifi=2022.6.15=py39hecd8cb5_0
+cffi=1.15.0=py39hc55c11b_1
+charset-normalizer=2.0.4=pyhd3eb1b0_0
+cryptography=37.0.1=py39hf6deb26_0
+idna=3.3=pyhd3eb1b0_0
+iniconfig=1.1.1=pyhd3eb1b0_0
+libcxx=12.0.0=h2f01273_0
+libffi=3.3=hb1e8313_2
+ncurses=6.3=hca72f7f_2
+openssl=1.1.1o=hca72f7f_0
+packaging=21.3=pyhd3eb1b0_0
+pip=21.2.4=py39hecd8cb5_0
+pluggy=1.0.0=py39hecd8cb5_1
+py=1.11.0=pyhd3eb1b0_0
+pycparser=2.21=pyhd3eb1b0_0
+pyopenssl=22.0.0=pyhd3eb1b0_0
+pyparsing=3.0.4=pyhd3eb1b0_0
+pysocks=1.7.1=py39hecd8cb5_0
+pytest=7.1.2=py39hecd8cb5_0
+python=3.9.12=hdfd78df_1
+pyyaml=6.0=py39hca72f7f_1
+readline=8.1.2=hca72f7f_1
+requests=2.27.1=pyhd3eb1b0_0
+setuptools=61.2.0=py39hecd8cb5_0
+sqlite=3.38.5=h707629a_0
+tk=8.6.12=h5d9f67b_0
+tomli=1.2.2=pyhd3eb1b0_0
+tzdata=2022a=hda174b7_0
+urllib3=1.26.9=py39hecd8cb5_0
+wheel=0.37.1=pyhd3eb1b0_0
+xz=5.2.5=hca72f7f_1
+yaml=0.2.5=haf1e3a3_0
+zlib=1.2.12=h4dc903c_2

@@ -1,0 +1,16 @@
+---
+# Outline the directories to be used by the application
+Directories:
+  working_path: "./"                            # The root directory of the application
+  csv_directory: "CSV_data/"                    # The Directory (from root) of the CSV data
+  images_directory: "Images/"                   # The Directory (from root) of the user images
+
+# Canvas specific information requried for authentication
+Canvas_data:
+  domain: ""                                    # Local canvas implementation domain EG: <org>.instructure.com 
+  access_token: ""                              # Access token to authenticate with canvas
+
+# Specific files used for the application
+File_names:
+  csv_filename: "data.csv"                      # Name of the csv file within the csv directory
+  log_filename: "Log.txt"                       # Name of the log file within the root directory

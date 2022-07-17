@@ -8,12 +8,16 @@
 # External inports
 
 # Internal Imports
-from src.ImageHandler.image import image
+from src.Image.image import image
 
 # File Class
 class client():
     ''' Represents a client '''
     
-    def __init__(self, client_id: int, image: image) -> None:
-        self.client_id: int = int(client_id)
+    def __init__(self, client_id: str, image: image) -> None:
+        
+        if (len(client_id) < 1):
+            raise ValueError("No value for Client ID has been passed")
+        
+        self.client_id: str = str(client_id)
         self.image: image = image
