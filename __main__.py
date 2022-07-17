@@ -35,6 +35,9 @@ except AssertionError:
 # FUNCTIONS
 ##############################
 class main():
+    '''
+        This is the main entry for the program
+    '''
     # Class variables 
     log: logger = None
     settings: config = None
@@ -268,5 +271,5 @@ class main():
 
 if __name__ == '__main__':
     # If module is run by itself then run main
-    main = main()
-    main.main()
+    main = main()       # Create main object
+    main.main()         # Run main from object

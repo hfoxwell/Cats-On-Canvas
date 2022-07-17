@@ -25,13 +25,19 @@ def mock_request_get():
 
     class mock_response_get(object):
         ''' mock response '''
+
+        status_code = 200
+        url = 'http://httpbin.org/get'
+        headers = {}
+        params = {}
+
         def __init__(self, addr, headers=None, params=None):
             self.status_code = 200
             self.url = 'http://httpbin.org/get'
             self.headers = headers
             self.params = params
 
-        def json(self):
+        def json():
             return {'id': '5678',
                     'url': 'http://www.testurl.com'}
 
@@ -68,7 +74,7 @@ def test_get_canvas_id(monkeypatch: pytest.MonkeyPatch):
     log = mock_log()
 
     # Create new connection
-    def mock_get():
+    def mock_get(url, params, headers):
         return mock_request_get()
 
     ## Monkeypatch the requests GET module
@@ -80,8 +86,19 @@ def test_get_canvas_id(monkeypatch: pytest.MonkeyPatch):
     # Get canvas id
     res = conn.get_canvas_id(test_user)
 
+    ## Assert that the result of the function is true ( success state )
+    ## Assert that client id has been changed to new number
     assert res == True
+    assert test_user.client_id == '5678'
 
-    ### TODO: Fix this test: The test needs to test a request, logger needs to be patched
-    ###         as does requests
-    
+
+def test_upload_user_data(monkeypatch: pytest.MonkeyPatch):
+    ''' Test the upload of user data '''
+
+    ### Process ###
+    # 1. the parameters and headers are set 
+    # 2. Post a request to a file    
+
+
+
+    # assert res == True
