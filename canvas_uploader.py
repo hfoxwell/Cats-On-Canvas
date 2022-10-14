@@ -25,7 +25,7 @@ except AssertionError:
     # Display error to user if triggered.
     print(
         f'{"#" * 10} ERROR {"#" * 10}',
-        "The currently installed version of python is insufficent to run this program.",
+        "The currently installed version of python is insufficient to run this program.",
         f'CURRENT VERSION: {sys.version_info} is less than required Version: 3.9.x(major=3, minor=9, micro=0)',
         sep='\n \t'
         )
@@ -52,7 +52,7 @@ class main():
         # for all files in the directory
         #   check each file for json or yaml
         for setting_file in settings_fileList:
-            # Deterimine the settings file format
+            # Determine the settings file format
             if ".json" in setting_file:
                 # if settings is json format create json parser
                 factory = config.json_factory()
@@ -62,7 +62,7 @@ class main():
             # if settings is yaml format create yaml parser
             factory = config.yaml_factory()
 
-        # Create new parser from the instasiated factory
+        # Create new parser from the instantiated factory
         conf_parser = factory.create_parser()
 
         # read the settings file using the new parser
@@ -71,7 +71,7 @@ class main():
                 print('Failed to load settings: Exiting application')
                 exit()
         
-        # return the config objec to the program
+        # return the config object to the program
         return conf_parser.load_config()
 
     def check_directories(self, *directories ) -> bool:
@@ -79,7 +79,7 @@ class main():
         Make sure that CSV and images directories exist.
         Then ensure that there are files contained within.
         '''
-        # For all directories passed into funciton 
+        # For all directories passed into function 
         # Check if they exist
         for arg in directories:
             if not(os.path.exists(arg)):
@@ -104,8 +104,8 @@ class main():
             This may need a controller or something along those lines. 
             '''
             '''
-            TODO: Main is too busy. This needs to be a more single responsiblity function. rewrite this so
-            that main is only responsible for working with the controlers. This may mean creating 
+            TODO: Main is too busy. This needs to be a more single responsibility function. rewrite this so
+            that main is only responsible for working with the controllers. This may mean creating 
             some controllers. 
             '''
             
@@ -241,7 +241,7 @@ class main():
             exit()
         
         #########################################
-        # Create and initalise canvas connector
+        # Create and initialise canvas connector
         #########################################
         try:
             #  Attempt to connect to canvas
