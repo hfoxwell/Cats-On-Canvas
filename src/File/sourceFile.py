@@ -10,6 +10,7 @@
 '''
 
 # External imports
+from io import TextIOWrapper
 import os, sys
 from abc import ABC,abstractmethod
 
@@ -25,6 +26,16 @@ class sourceFile(ABC):
     def _verify_file(self, file: str):
         ''' Verify the correct file type is passed in '''
         pass
+    
+    @abstractmethod
+    def _open_file(self, file: str, mode: str) -> TextIOWrapper:
+        ''' Opens the file for reading'''
+        pass
+    
+    @abstractmethod
+    def __del__(self):
+        ''' cleanup after the object '''
+        pass
 
 class csv_Source(sourceFile):
     '''Opens CSV files for reading'''
@@ -35,7 +46,8 @@ class csv_Source(sourceFile):
         self._verify_file(input_file)
         
         # if no error was raised
-        self.csv_file = input_file    
+        self.open_file: TextIOWrapper = self._open_file(
+            input_file, "r")
         
     def _verify_file(self, file: str):
         # Variables
@@ -46,3 +58,14 @@ class csv_Source(sourceFile):
         if not(current_file_extension in file_extensions):
             raise AttributeError(
                 f"Expected CSV file: {current_file_extension}")
+            
+    def _open_file(self, file: str, mode: str) -> TextIOWrapper:
+        # open the file
+        open_file: TextIOWrapper = None
+        open_file = open(file, mode)
+        # return file object to caller
+        return file
+    
+    def __del__(self):
+        # Close the open file
+        self.open_file.close()
