@@ -5,7 +5,7 @@
         Class that handles client information
 '''
 
-# External inports
+# External imports
 
 # Internal Imports
 from src.Image.image import image

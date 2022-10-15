@@ -5,16 +5,21 @@
         Class for reading the CSV file
 '''
 
+# TODO: The reader objects are not single purpose.
+#   These objects should be renamed to parser. 
+#   So as to parse sourceFile to objects
+
 # External imports
 from abc import ABC, abstractmethod
 import csv
 
 # Internal Imports
-from src.File.sourceFile import csv_Source
+from src.File.sourceFile import *
+from src.Clients import user
 
 ##########
 '''
-    TODO: This needs to be Dependancy injected. It currently is too coupled on CSV_source
+    TODO: This needs to be Dependency injected. It currently is too coupled on CSV_source
 '''
 ##########
 
@@ -22,8 +27,8 @@ from src.File.sourceFile import csv_Source
 class Reader(ABC):
     '''Reader for csv files'''
     @abstractmethod
-    def __init__(self) -> None:
-        '''Initalise Reader'''
+    def __init__(self, source: sourceFile) -> None:
+        '''Initialise Reader'''
 
     @abstractmethod
     def get_clients(self) -> list:
@@ -32,9 +37,15 @@ class Reader(ABC):
 class csv_reader(Reader):
     ''' read CSV files '''
 
-    def __init__(self, src: str) -> None:
-        ''' Initalise a reader with a source '''
-        self.source_file = csv_Source(src).file
+    def __init__(self, sourceFile: sourceFile) -> None:
+        ''' Initialise a reader with a source '''
+        
+        # Verify that sourcefile is CSV filetype
+        if (type(sourceFile) != type(csv_Source)):
+            raise TypeError(f"Incorrect source file type: {sourceFile}")
+        
+        # Assign source file
+        self.source_file = sourceFile.file
 
     def get_clients(self) -> list:
         ''' Read clients from csv and return details'''
@@ -48,3 +59,4 @@ class csv_reader(Reader):
             clients_list.append(row)
 
         return clients_list
+
