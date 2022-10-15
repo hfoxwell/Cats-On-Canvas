@@ -2,7 +2,11 @@
     Author: H Foxwell
     Date:   29/05/2022
     Purpose:    
-        Class for opening files for reading or writing
+        Collection of classes for opening and verifying
+        the files to be passed to a reader. Each will 
+        verify they are of the correct file type before
+        presenting a file object for reading. Either 
+        TextIOWrapper or ByteIOWrapper.
 '''
 
 # External imports
@@ -21,15 +25,6 @@ class sourceFile(ABC):
     def _verify_file(self, file: str):
         ''' Verify the correct file type is passed in '''
         pass
-    
-    @abstractmethod
-    def __iter__(self):
-        ''' when csv_sourcefile is iterated return a row '''
-        pass
-
-# TODO: Each source file should be responsible for 
-#   reading the sourcefile and return a row
-#   from the sourcefile
 
 class csv_Source(sourceFile):
     '''Opens CSV files for reading'''
@@ -51,10 +46,3 @@ class csv_Source(sourceFile):
         if not(current_file_extension in file_extensions):
             raise AttributeError(
                 f"Expected CSV file: {current_file_extension}")
-    
-    def __iter__(self):
-        ''' when csv_source is iterated over return row'''
-        with open(self.csv_file, "r") as file:
-            for row in file:
-                row = row.rstrip().split(",")
-                yield row
