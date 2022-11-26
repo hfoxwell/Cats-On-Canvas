@@ -15,4 +15,4 @@ jobs:
     - name: Install dependencies
       run: |
         # $CONDA is an environment variable pointing to the root of the miniconda directory
-        $CONDA env create --file environment.yml -n COC
+        conda env create --file environment.yml -n COC
