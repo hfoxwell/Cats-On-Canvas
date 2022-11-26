@@ -5,17 +5,47 @@
         Test the new source file system for cats on canvas
 """
 # imports
-from io import StringIO
+import csv, pytest, string, random
+from io import TextIOWrapper
+from pytest import MonkeyPatch
 
 # local imports
 from src.File import sourceFile
+from testing import Helper_functions
 
-in_mem_csv = StringIO("""\
-col1,col2,col3
-1,3,foo
-2,5,bar
--1,7,baz""")  # in python 2.7, put a 'u' before the test string
-test_reader = sourceFile.csv_Source(in_mem_csv)
-for line in test_reader:
-    print(line)
-    # whatever you need to test to make sure the csv reader works correctly
+# TODO: Mock a file to open
+class Test_sourcefile:
+    
+    def test_validFile(self, monkeypatch: MonkeyPatch):
+        ''' Verify error is not thrown for valid csv files '''
+        num_of_tests = 10
+        valid_file_types = {
+            'text'      : '.txt',
+            'comma_sep' : '.csv'
+        }
+        
+        # Mock the open Function
+        def mock_open():
+            return None
+        
+        # Monkeypatch the open file
+        monkeypatch.setattr(sourceFile.csv_Source, 'open', mock_open)
+        
+        for test in range(num_of_tests):
+            # Variables for filename
+            filename: str = Helper_functions.generate_random_string(
+                length=random.randint(1, 20),
+                charset=string.ascii_letters
+            )
+            
+            filename.join(random.choice(valid_file_types.items))
+            
+            print(f'{test} -- {filename}')
+            sourceFile.csv_Source(input_file=filename)
+            
+        
+
+    def test_invalidFile(self):
+        ''' Verify that error is thrown for invalid csv files '''
+
+# TODO: Mock use of a factory method to return correct file object

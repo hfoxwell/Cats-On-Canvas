@@ -10,8 +10,8 @@
 '''
 
 # External imports
+import os
 from io import TextIOWrapper
-import os, sys
 from abc import ABC,abstractmethod
 
 # Internal imports
