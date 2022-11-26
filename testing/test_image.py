@@ -26,16 +26,16 @@ def test_image():
     byte: bytes = [bytes(random.randint(0, 256)) for x in range(1000)]
     name = "1042800.jpeg"
     path = "Images/"
-    filety = ".jpg"
+    file_type = ".jpg"
 
     # Create image object
-    img: image = image(byte, name, path, filety)
+    img: image = image(byte, name, path, file_type)
 
     ## Assert statements
     assert byte == img.image_file
     assert name == img.image_name
     assert path == img.image_path
-    assert filety == img.file_type
+    assert file_type == img.file_type
     assert img.image_size == (byte.__sizeof__())
 
 ##
@@ -50,16 +50,16 @@ def test_image_real():
     sizeBytes = (byte.__sizeof__())
     name = "1042800.jpeg"
     path = "Images/"
-    filety = ".jpg"
+    file_type = ".jpg"
 
     # Create image object
-    img: image = image(byte, name, path, filety)
+    img: image = image(byte, name, path, file_type)
 
     ## Assert statements
     assert byte == img.image_file
     assert name == img.image_name
     assert path == img.image_path
-    assert filety == img.file_type
+    assert file_type == img.file_type
     assert img.image_size == sizeBytes
 
 ##
