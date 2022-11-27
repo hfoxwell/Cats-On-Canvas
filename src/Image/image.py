@@ -1,7 +1,7 @@
 '''
     Author: H Foxwell
     Date:   26/05/2022
-    Purpose:    
+    Purpose:
         Class representing an image
 '''
 # External imports
@@ -15,11 +15,11 @@ from dataclasses import dataclass, field
 @dataclass
 class image:
     image_file: bytes = field(compare=False)
-    image_name:str = field(compare=True)
+    image_name: str = field(compare=True)
     image_path: str = field(compare=False)
-    file_type:str = field(compare=False)
-    image_size:int = field(init=False)
-    image_canvas_id:str = field(init=False)
+    file_type: str = field(compare=False)
+    image_size: int = field(init=False)
+    image_canvas_id: str = field(init=False)
 
     def __post_init__(self):
         imgSize: int = (self.image_file.__sizeof__())
@@ -30,23 +30,23 @@ class image:
 
 
 # File module
-''' Handles all images for the app '''    
 class imageFactory():
+    ''' Handles all images for the app '''
 
     def __init__(self, img_path: str, img_name: str) -> None:
-        
+
         # Check that specified image exists
         if not(self.image_exists(img_path, img_name)):
             raise OSError("File not Found")
-        
+
         self.image_path: str = img_path
         self.image_name: str = img_name
-        
+
     def open_image(self) -> image:
         '''Open an image file'''
-        # Open file as byte file 
-        img_bytes = open(f'{self.image_path}{self.image_name}','rb').read()
-        
+        # Open file as byte file
+        img_bytes = open(f'{self.image_path}{self.image_name}', 'rb').read()
+
         # create image file object and return
         return image(img_bytes, self.image_name, self.image_path, "")
 
