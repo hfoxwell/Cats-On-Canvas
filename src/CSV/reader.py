@@ -1,12 +1,12 @@
 '''
     Author: H Foxwell
     Date:   26/05/2022
-    Purpose:    
+    Purpose:
         Class for reading the CSV file
 '''
 
 # TODO: The reader objects are not single purpose.
-#   These objects should be renamed to parser. 
+#   These objects should be renamed to parser.
 #   So as to parse sourceFile to objects
 
 # External imports
@@ -18,11 +18,13 @@ from src.File import sourceFile, csv_Source
 
 ##########
 '''
-    TODO: This needs to be Dependency injected. It currently is too coupled on CSV_source
+    TODO: This needs to be Dependency injected.
+    It currently is too coupled on CSV_source
 '''
 ##########
 
-#File Class
+
+# File Class
 class Reader(ABC):
     '''Reader for csv files'''
     @abstractmethod
@@ -31,18 +33,19 @@ class Reader(ABC):
 
     @abstractmethod
     def get_clients(self) -> list:
-       ''' Returns list of clients from file'''
+        ''' Returns list of clients from file'''
+
 
 class csv_reader(Reader):
     ''' read CSV files '''
 
     def __init__(self, sourceFile: sourceFile) -> None:
         ''' Initialise a reader with a source '''
-        
+
         # Verify that sourcefile is CSV filetype
         if (type(sourceFile) != type(csv_Source)):
             raise TypeError(f"Incorrect source file type: {sourceFile}")
-        
+
         # Assign source file
         self.source_file = sourceFile.file
 
@@ -58,4 +61,3 @@ class csv_reader(Reader):
             clients_list.append(row)
 
         return clients_list
-
