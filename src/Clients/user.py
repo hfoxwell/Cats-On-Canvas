@@ -10,6 +10,7 @@
 # Internal Imports
 from src.Image import image
 
+
 # File Class
 class client():
     ''' Represents a client '''
