@@ -10,11 +10,11 @@
 import os, sys
 
 # Internal imports
-from src.Image.image import imageFactory
-from src.Logger.log import logger
+from src.Image import imageFactory
+from src.Logger import logger
 from src.CSV import reader
-from src.Clients.user import client
-from src.Requests.canvas_requests import POST_data_canvas
+from src.Clients import client
+from src.Requests import POST_data_canvas
 from src.Config import config
 
 # Assert python minimum version
