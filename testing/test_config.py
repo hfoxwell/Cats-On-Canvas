@@ -10,7 +10,7 @@ import pytest
 from pytest import MonkeyPatch
 
 # Internal imports
-from src.Config.config import *
+from src.Config import config
 
 ############################
 # Test cases
@@ -22,9 +22,9 @@ from src.Config.config import *
 
 def test_factory_json():
     ''' Test the json factory '''
-    newFactory = json_factory()
+    newFactory = config.json_factory()
 
-    assert type(newFactory) == json_factory
+    assert type(newFactory) == config.json_factory
 
 
 ##
@@ -33,9 +33,9 @@ def test_factory_json():
 
 def test_factory_yaml():
     ''' Test the yaml factory '''
-    newFactory = yaml_factory()
+    newFactory = config.yaml_factory()
 
-    assert type(newFactory) == yaml_factory
+    assert type(newFactory) == config.yaml_factory
 
 ##
 # 3
@@ -43,7 +43,7 @@ def test_factory_yaml():
 
 def test_json_parser(monkeypatch: MonkeyPatch):
 
-    jParser = json_parser(config)
+    jParser = config.json_parser(config)
 
     assert jParser.configuration != None
     assert jParser.Settings_contents == None
@@ -52,7 +52,7 @@ def test_json_parser(monkeypatch: MonkeyPatch):
         return {
             "working_path"      : "./",
             "access_token"      : "abcd1234",
-            "domain"            : "test.instrudture.com",
+            "domain"            : "test.instructure.com",
             "csv_directory"     : "test_dir/",
             "images_path"   : "test_dir2",
             "csv_filename"      : "csv.csv",
