@@ -53,7 +53,7 @@ class Canvas_connector(ABC):
             self.log.write_log("CANVAS: Connection Successfully Tested")
             return True
         else:
-            # If other result recieved return false
+            # If other result received return false
             self.log.write_error(ConnectionRefusedError(
                 f"Canvas Refused the connection: {res.status_code}"))
             raise ConnectionRefusedError("Canvas Refused the connection")
@@ -209,7 +209,7 @@ class POST_data_canvas(Canvas_connector):
                 params=self.params
             )
 
-        # If the canvas response is 200, then the update has been sucessful
+        # If the canvas response is 200, then the update has been successful
         if set_avatar_user.status_code == 200:
             self.log.write_log(
                 f'success updating user avatar for: {user.client_id}')
