@@ -12,7 +12,7 @@
 # External imports
 import os
 from io import TextIOWrapper
-from abc import ABC,abstractmethod
+from abc import ABC, abstractmethod
 
 # Internal imports
 

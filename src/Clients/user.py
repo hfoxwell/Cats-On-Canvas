@@ -8,7 +8,7 @@
 # External imports
 
 # Internal Imports
-from src.Image.image import image
+from src.Image import image
 
 # File Class
 class client():

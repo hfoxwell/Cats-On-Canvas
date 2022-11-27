@@ -14,8 +14,7 @@ from abc import ABC, abstractmethod
 import csv
 
 # Internal Imports
-from src.File.sourceFile import *
-from src.Clients import user
+from src.File import sourceFile, csv_Source
 
 ##########
 '''

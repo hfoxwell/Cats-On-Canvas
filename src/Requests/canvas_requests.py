@@ -8,11 +8,12 @@
 
 # External imports
 from abc import ABC, abstractmethod
-import requests, json
+import requests
+import json
 
 # Internal imports
-from src.Clients.user import client
-from src.Logger.log import logger
+from src.Clients import client
+from src.Logger import logger
 
 
 class Canvas_connector(ABC):

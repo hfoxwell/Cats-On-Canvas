@@ -4,9 +4,9 @@
     Purpose:    
         Class representing an image
 '''
-# Exernal imports
-from dataclasses import dataclass, field
+# External imports
 import os
+from dataclasses import dataclass, field
 
 
 # Internal Imports
