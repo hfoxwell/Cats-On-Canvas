@@ -11,6 +11,7 @@ from pytest import MonkeyPatch
 
 # local imports
 from src.File import sourceFile
+from src.File import csv_Source
 from testing import Helper_functions
 
 # TODO: Mock a file to open
@@ -29,7 +30,7 @@ class Test_sourcefile:
             return None
         
         # Monkeypatch the open file
-        monkeypatch.setattr(sourceFile.csv_Source, 'open', mock_open)
+        monkeypatch.setattr(csv_Source, 'open', mock_open)
         
         for test in range(num_of_tests):
             # Variables for filename

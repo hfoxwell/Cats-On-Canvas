@@ -11,6 +11,9 @@ from pytest import MonkeyPatch
 
 # Internal imports
 from src.Config import config
+from src.Config import json_factory
+from src.Config import yaml_factory
+from src.Config import json_parser
 
 ############################
 # Test cases
@@ -22,9 +25,9 @@ from src.Config import config
 
 def test_factory_json():
     ''' Test the json factory '''
-    newFactory = config.json_factory()
+    newFactory = json_factory()
 
-    assert type(newFactory) == config.json_factory
+    assert type(newFactory) == json_factory
 
 
 ##
@@ -33,9 +36,9 @@ def test_factory_json():
 
 def test_factory_yaml():
     ''' Test the yaml factory '''
-    newFactory = config.yaml_factory()
+    newFactory = yaml_factory()
 
-    assert type(newFactory) == config.yaml_factory
+    assert type(newFactory) == yaml_factory
 
 ##
 # 3
@@ -43,7 +46,7 @@ def test_factory_yaml():
 
 def test_json_parser(monkeypatch: MonkeyPatch):
 
-    jParser = config.json_parser(config)
+    jParser = json_parser(config)
 
     assert jParser.configuration != None
     assert jParser.Settings_contents == None

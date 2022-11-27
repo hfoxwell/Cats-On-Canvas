@@ -10,7 +10,7 @@ from pytest import MonkeyPatch
 
 
 # Internal import
-from src.Clients.user import client
+from src.Clients import client
 from src.Image import image
 
 def test_client(monkeypatch: MonkeyPatch):
@@ -22,7 +22,7 @@ def test_client(monkeypatch: MonkeyPatch):
     def patch_image():
         return object()
 
-    # Monkey Patch the initaliser
+    # Monkey Patch the initialiser
     monkeypatch.setattr(image,'image',  patch_image)
 
     # Create new user
@@ -43,7 +43,7 @@ def test_no_client(monkeypatch: MonkeyPatch):
     def patch_image():
         return object()
 
-    # Monkey Patch the initaliser
+    # Monkey Patch the initialiser
     monkeypatch.setattr(image,'image',  patch_image)
 
     with pytest.raises(ValueError):
