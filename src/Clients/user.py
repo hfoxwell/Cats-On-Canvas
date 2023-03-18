@@ -8,6 +8,7 @@
 # External imports
 
 # Internal Imports
+import numpy as np
 from src.Image import image
 
 
@@ -17,8 +18,8 @@ class client():
 
     def __init__(self, client_id: str, image: image) -> None:
 
-        if (len(client_id) < 1):
-            raise ValueError("No value for Client ID has been passed")
+        if client_id == np.nan :
+            raise ValueError("Nan value for Client ID has been passed")
 
         self.client_id: str = str(client_id)
         self.image: image = image
