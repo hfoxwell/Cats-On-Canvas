@@ -6,9 +6,9 @@
 '''
 
 # External imports
+import numpy as np
 
 # Internal Imports
-import numpy as np
 from src.Image import image
 
 
