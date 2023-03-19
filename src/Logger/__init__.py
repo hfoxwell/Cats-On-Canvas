@@ -4,4 +4,4 @@
 # import 
 
 # local imports
-from log import logger
+from .log import logger

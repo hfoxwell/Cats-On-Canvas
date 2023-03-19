@@ -10,8 +10,8 @@ from pytest import MonkeyPatch
 
 
 # Internal import
-from src.Clients.user import client
-from src.Image import image
+import src.Clients
+import src.Image
 
 def test_client(monkeypatch: MonkeyPatch):
     ''' Test client Creation'''

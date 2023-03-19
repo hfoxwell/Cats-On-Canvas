@@ -45,6 +45,12 @@ class main():
     def get_settings(self, dir: str):
         ''' Load the settings object '''
         
+        '''
+            TODO: #18 variable is always taken from the first element of the ./Settings directory.
+            It would be better to iterate over all files in the directory and try to load each 
+            one until a valid file is found.
+        '''
+        
         # Variables
         settings_fileList: list[str] = os.listdir(dir)
         factory: config.abstract_settings_factory = None
@@ -79,6 +85,12 @@ class main():
         Make sure that CSV and images directories exist.
         Then ensure that there are files contained within.
         '''
+        
+        '''
+            TODO: #19 function always returns True if all directories exist. 
+            However, it would be better to return False if any directory is missing or empty.
+        '''
+        
         # For all directories passed into function 
         # Check if they exist
         for arg in directories:

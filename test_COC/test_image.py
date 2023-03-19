@@ -46,7 +46,7 @@ def test_image_real():
     ''' Test with real image '''
     
     # Variables
-    byte: bytes = open("./testing/testFiles/catto.jpeg",'rb').read()
+    byte: bytes = open("./test_COC/testFiles/catto.jpeg",'rb').read()
     sizeBytes = (byte.__sizeof__())
     name = "1042800.jpeg"
     path = "Images/"
