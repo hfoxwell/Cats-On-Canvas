@@ -10,7 +10,7 @@ import requests, json, pytest, string, random
 
 # Internal imports
 from src.Requests import canvas_requests
-from src.Clients import user
+from src.Clients import client
 
 ###################
 ## Tests
@@ -70,7 +70,7 @@ def test_get_canvas_id(monkeypatch: pytest.MonkeyPatch):
     img = None
 
     # Create test user
-    test_user: user.client = user.client(user_ID, img)
+    test_user: client = client(user_ID, img)
     log = mock_log()
 
     # Create new connection

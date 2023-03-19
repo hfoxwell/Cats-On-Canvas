@@ -6,6 +6,16 @@
         server and the canvas API.
 '''
 
+'''
+    - Use type annotations more consistently throughout the code to improve readability and maintainability.
+    - Use requests.Session() to reduce the overhead of repeatedly sending authentication headers with every request.
+    - Instead of raising an error when the connection test fails, return a boolean False value instead. This allows the caller to handle the error more gracefully.
+    - Use more descriptive function names to make it easier to understand what each function does.
+    - Add more error handling to the upload_user_data() function to handle potential errors that might occur during the file upload process.
+    - Instead of using async and await keywords with get_canvas_id() and upload_user_data() functions, use the standard synchronous approach since there are no asynchronous operations in those functions.
+    - Consider using f-strings or str.format() to format log messages more succinctly and consistently.
+'''
+
 # External imports
 from abc import ABC, abstractmethod
 import requests
