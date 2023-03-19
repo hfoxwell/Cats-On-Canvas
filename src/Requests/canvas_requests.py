@@ -33,8 +33,8 @@ class Canvas_connector(ABC):
         ''' Initialise a connector'''
         self.Auth_token: str = Token
         self.domain: str = f'https://{domain}/api/v1'
-        self.header: tuple = {'Authorization': f'Bearer {self.Auth_token}'}
-        self.params: tuple = {}
+        self.header: dict = {'Authorization': f'Bearer {self.Auth_token}'}
+        self.params: dict = {}
 
         # Logger instance
         self.log: logger = logInstance
@@ -53,9 +53,9 @@ class Canvas_connector(ABC):
     def test_canvas_connection(self):
         '''Validates that connection to canvas can be made'''
         # Variables
-        desired_result = 200
+        desired_result: int = 200
 
-        res = requests.get(
+        res : requests.Response = requests.get(
             f'{self.domain}/accounts', self.params, headers=self.header)
 
         if res.status_code == desired_result:
@@ -97,7 +97,7 @@ class POST_data_canvas(Canvas_connector):
 
         # Send get request for a user's canvas id. This is
         # different from their SIS id
-        user_Details = requests.get(
+        user_Details : requests.Response = requests.get(
             f'{self.domain}/users/sis_user_id:{user.client_id}',
             headers=self.header,
             params=self.params
@@ -127,7 +127,7 @@ class POST_data_canvas(Canvas_connector):
             }
 
         # Prepare Canvas for upload
-        response = requests.post(
+        response : requests.Response = requests.post(
             url,
             headers=self.header,
             data=inform_parameters)
