@@ -20,6 +20,10 @@ class client():
 
         if client_id == np.nan :
             raise ValueError("Nan value for Client ID has been passed")
+        else:
+            if client_id.isdigit():
+                print('Yes client_id is string representation of int ')
+            pass
 
         self.client_id: str = str(client_id)
         self.image: image = image
