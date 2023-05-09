@@ -20,24 +20,28 @@
 from abc import ABC, abstractmethod
 import requests
 import json
+import logging
 
 # Internal imports
 from src.Clients import client
-from src.Logger import logger
 
 
 class Canvas_connector(ABC):
     '''Abstract base class for canvas connector'''
 
-    def __init__(self, Token: str, domain: str, logInstance: logger) -> None:
+    def __init__(self, Token: str, domain: str) -> None:
         ''' Initialise a connector'''
+        self.Session = requests.Session()
+        # TODO: implement the sessions system from requests, to save on request information
         self.Auth_token: str = Token
         self.domain: str = f'https://{domain}/api/v1'
-        self.header: tuple = {'Authorization': f'Bearer {self.Auth_token}'}
-        self.params: tuple = {}
+        self.header: dict = {'Authorization': f'Bearer {self.Auth_token}'}
+        self.params: dict = {}
+        
+        self.Session.headers.update()
 
         # Logger instance
-        self.log: logger = logInstance
+        self.log: logging.Logger = logging.getLogger(__name__)
 
         # Log initialised values
         self.log.write_log(
@@ -53,9 +57,9 @@ class Canvas_connector(ABC):
     def test_canvas_connection(self):
         '''Validates that connection to canvas can be made'''
         # Variables
-        desired_result = 200
+        desired_result: int = 200
 
-        res = requests.get(
+        res : requests.Response = requests.get(
             f'{self.domain}/accounts', self.params, headers=self.header)
 
         if res.status_code == desired_result:
@@ -84,9 +88,9 @@ class Canvas_connector(ABC):
 class POST_data_canvas(Canvas_connector):
     ''' Posts data to canvas'''
 
-    def __init__(self, Token: str, domain: str, logInstance: logger) -> None:
+    def __init__(self, Token: str, domain: str) -> None:
         ''' For passing information to canvas '''
-        super().__init__(Token, domain, logInstance)
+        super().__init__(Token, domain)
 
     async def get_canvas_id(self, user: client) -> bool:
         ''' Gets a user ID from Canvas '''
@@ -97,7 +101,7 @@ class POST_data_canvas(Canvas_connector):
 
         # Send get request for a user's canvas id. This is
         # different from their SIS id
-        user_Details = requests.get(
+        user_Details : requests.Response = requests.get(
             f'{self.domain}/users/sis_user_id:{user.client_id}',
             headers=self.header,
             params=self.params
@@ -127,7 +131,7 @@ class POST_data_canvas(Canvas_connector):
             }
 
         # Prepare Canvas for upload
-        response = requests.post(
+        response : requests.Response = requests.post(
             url,
             headers=self.header,
             data=inform_parameters)

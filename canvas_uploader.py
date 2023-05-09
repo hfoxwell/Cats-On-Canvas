@@ -10,11 +10,11 @@
 import os, sys
 
 # Internal imports
-from src.Image.image import imageFactory
-from src.Logger.log import logger
+from src.Image import imageFactory
+from src.Logger import logger
 from src.CSV import reader
-from src.Clients.user import client
-from src.Requests.canvas_requests import POST_data_canvas
+from src.Clients import client
+from src.Requests import POST_data_canvas
 from src.Config import config
 
 # Assert python minimum version
@@ -38,7 +38,7 @@ class main():
     '''
         This is the main entry for the program
     '''
-    # Class variables 
+    # Class variables
     log: logger = None
     settings: config = None
 
@@ -50,7 +50,7 @@ class main():
             It would be better to iterate over all files in the directory and try to load each 
             one until a valid file is found.
         '''
-        
+
         # Variables
         settings_fileList: list[str] = os.listdir(dir)
         factory: config.abstract_settings_factory = None
@@ -76,12 +76,12 @@ class main():
             if not(conf_parser.read_file(settingsFile)):
                 print('Failed to load settings: Exiting application')
                 exit()
-        
+
         # return the config object to the program
         return conf_parser.load_config()
 
     def check_directories(self, *directories ) -> bool:
-        ''' 
+        '''
         Make sure that CSV and images directories exist.
         Then ensure that there are files contained within.
         '''
@@ -99,7 +99,7 @@ class main():
                 return False
             else:
                 self.log.write_log(f'File: "{arg}" found.')
-        
+
         # If all directories exist return true
         return True
 
@@ -107,20 +107,20 @@ class main():
         ''' Returns a list of user objects'''
         # Variables
         userList: list[client] = []
-        
+
         # Iterate through list from Csv
         for student in client_list:
-            
+
             '''
-            TODO: Find a way to create the user object so that MAIN does not need to be aware of clients. 
-            This may need a controller or something along those lines. 
+            TODO: Find a way to create the user object so that MAIN does not need to be aware of clients.
+            This may need a controller or something along those lines.
             '''
             '''
             TODO: Main is too busy. This needs to be a more single responsibility function. rewrite this so
-            that main is only responsible for working with the controllers. This may mean creating 
-            some controllers. 
+            that main is only responsible for working with the controllers. This may mean creating
+            some controllers.
             '''
-            
+
             self.log.write_log(f'Current Student: {student}')
 
             # confirm user's image exists in directory
@@ -132,11 +132,11 @@ class main():
                 self.log.write_error(FileNotFoundError(f'FILE: {e} {student["image_filename"]}'))
                 self.log.write_log(f'USER: user, {student["client_id"]} Skipped as no image could be found')
                 continue
-            
+
             # Create user object
             try:
                 user: client = client(
-                    student['client_id'], 
+                    student['client_id'],
                     imgFactory.open_image()
                     )
             except Exception as userError:
@@ -156,7 +156,7 @@ class main():
 
             # Add user object to list of users
             userList.append(user)
-        
+
         ###############################
         # Console & log Number of users
         ###############################
@@ -193,7 +193,7 @@ class main():
     def main(self):
         ''' Main function for controlling application flow'''
         # Variables
-    
+
         list_of_clients: list[client] = []
 
         #######################################
@@ -228,7 +228,7 @@ class main():
         ######################################
         # Create CSV reader
         ######################################
-        
+
         file_reader: reader.Reader = reader.csv_reader(f'{self.settings.csv_directory}{self.settings.csv_filename}')
         list_of_clients = file_reader.get_clients()
 
@@ -251,7 +251,7 @@ class main():
             print("No users were created. Closing application")
             self.log.write_error("USER: no users were found. Exiting..")
             exit()
-        
+
         #########################################
         # Create and initialise canvas connector
         #########################################
@@ -265,17 +265,17 @@ class main():
             print(Exception('Error connecting to canvas, Quitting application'))
             exit()
         self.log.write_log("Successfully created canvas connection. Commencing upload.")
-        
+
         ########################################
         # For each user Start upload process
         ########################################
         count_of_uploaded_users:int = 1
         for user in user_list:
             ''' For each student in user list upload data to canvas '''
-            
+
             # Call function to process a user
             self.process_user(user, connector)
-            
+
             # Confirm in the console that user has been uploaded...
             # Increment after upload is completed
             print(f'Finished {count_of_uploaded_users} of {len(user_list)} users')

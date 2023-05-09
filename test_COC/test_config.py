@@ -10,7 +10,10 @@ import pytest
 from pytest import MonkeyPatch
 
 # Internal imports
-from src.Config.config import *
+from src.Config import config
+from src.Config import json_factory
+from src.Config import yaml_factory
+from src.Config import json_parser
 
 ############################
 # Test cases
@@ -52,7 +55,7 @@ def test_json_parser(monkeypatch: MonkeyPatch):
         return {
             "working_path"      : "./",
             "access_token"      : "abcd1234",
-            "domain"            : "test.instrudture.com",
+            "domain"            : "test.instructure.com",
             "csv_directory"     : "test_dir/",
             "images_path"   : "test_dir2",
             "csv_filename"      : "csv.csv",
