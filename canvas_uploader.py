@@ -16,6 +16,7 @@ from src.CSV import reader
 from src.Clients import client
 from src.Requests import POST_data_canvas
 from src.Config import config
+from src.custom_errors import *
 
 def check_python_version() -> None:
     '''
@@ -93,15 +94,12 @@ class main():
         # return the config object to the program
         return conf_parser.load_config()
 
-    def check_directories(self, *directory_list ) -> bool:
+    def check_directories(self, *directory_list ) -> None:
         '''
         Make sure that CSV and images directories exist.
         Then ensure that there are files contained within.
         '''
-        
-        # Directories are assumed valid to start with
-        directories_valid: bool = True
-        
+
         # log start of function
         self.log.write_log(
             "FILE: Verifying directories"
@@ -111,42 +109,23 @@ class main():
             directory_list
         )
         
-        # For all directories passed into function 
-        # Check if they exist and that they have 
-        # Valid contents
+        # Verify the folders 
         for directory in directory_list:
             
-            # Verify that the directory exits
-            if not(os.path.exists(directory)):
-                self.log.write_error(
-                    FileNotFoundError(
-                        f'FILE: file or directory MISSING: {directory}'
-                    )
-                )
-                
-                # Directories are no longer valid
-                directories_valid = False
-                
+            # If directory does not exist
+            # raise error informing user that
+            # directory is non-existant
+            if not os.path.exists(directory):
+                self.log.write_error(FileNotFoundError(f'FILE: File or directory MISSING: {directory}'))
+                raise DirectoriesCheckError(f'File or directory missing: {directory}')
             else:
-                self.log.write_log(
-                    f'FILE: "{directory}" found'
-                )
-                
-            # Verify contents of directory
-            if not(os.listdir(directory)):
-                self.log.write_error(
-                    ValueError(
-                        f'FILE: Directory EMPTY: {directory}'
-                    )
-                )
-                
-                # Directories are not valid
-                directories_valid = False
-            
-            
-        # If all directories exist return true
-        return directories_valid
+                self.log.write_log(f'File: "{directory}" found.')
 
+            # If folder empty, then raise value error
+            if not os.listdir(directory):
+                self.log.write_error(ValueError(f'FILE: Directory EMPTY: {directory}'))
+                raise DirectoriesCheckError(f'Directory is empty: {directory}')
+            
     def Create_student_list(self, client_list: list[client], img_location:str) -> list[client]:
         ''' Returns a list of user objects'''
         # Variables
