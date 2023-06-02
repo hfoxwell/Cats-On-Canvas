@@ -17,19 +17,32 @@ from src.Clients import client
 from src.Requests import POST_data_canvas
 from src.Config import config
 
-# Assert python minimum version
-try:
-    # Check python min version
-    assert sys.version_info >= (3,9)
-except AssertionError:
-    # Display error to user if triggered.
-    print(
-        f'{"#" * 10} ERROR {"#" * 10}',
-        "The currently installed version of python is insufficient to run this program.",
-        f'CURRENT VERSION: {sys.version_info} is less than required Version: 3.9.x(major=3, minor=9, micro=0)',
-        sep='\n \t'
+def check_python_version() -> None:
+    '''
+    Checks the installed python version and exits the program if it's below the
+    required version: 3:9:x (major=3, minor=9, micro=0)
+    '''
+    
+    # Python version
+    version: tuple[int, int, int] = (3, 9, 0)
+    
+    if ( sys.version_info < version ):
+        
+        # Print out error message to console
+        # Logger is not initialised at this point,
+        # so no log is produced
+        print(
+            f'{"#" * 10} ERROR {"#" * 10}',
+            "The currently installed version of python is insufficient to run this program.",
+            f'''CURRENT VERSION: {sys.version_info} is less than required Version:
+            {version[0]}.{version[1]}.x(major={version[0]}, minor={version[1]}, micro=0)''',
+            sep='\n \t'
         )
-    exit()
+        
+        # Close the program if the python
+        # version is below the required value
+        exit()
+
 
 ##############################
 # FUNCTIONS
@@ -282,6 +295,16 @@ class main():
             count_of_uploaded_users += 1
 
 if __name__ == '__main__':
+    '''
+        Sets up the program and runs the canvas uploader
+        Checks the program state first, then sets up the 
+        main object to be used.
+    '''
+    
+    # Check python state
+    check_python_version()
+    
+    
     # If module is run by itself then run main
     main = main()       # Create main object
     main.main()         # Run main from object
