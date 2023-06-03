@@ -235,16 +235,35 @@ class main():
         #########################################
 
         # Check that files and directories exist
-        if not(self.check_directories(
-            self.settings.working_path,
-            self.settings.log_filename,
-            self.settings.images_path,
-            self.settings.csv_directory,
-            f'{self.settings.csv_directory}{self.settings.csv_filename}'
-            )):
-            # If directories don't exist then warn user
-            print('Program cannot continue due to fatal error processing files')
-            return
+        # Raise custom error 'DirectoriesCheckError'
+        # if the directories are not valid
+        try:
+            self.check_directories(
+                self.settings.working_path,
+                self.settings.log_filename,
+                self.settings.images_path,
+                self.settings.csv_directory,
+                f'{self.settings.csv_directory}{self.settings.csv_filename}')
+        except DirectoriesCheckError as DCE:
+            message: str = f'FILE: {DCE}. Exiting program'
+            # Log the error
+            self.log.write_error(message)
+            print(message)
+            
+            #exiting program
+            exit()
+            
+        except ValueError as VE:
+            message: str = f'FILE: {VE}. Exiting program'
+            # Log error
+            self.log.write_error(message)
+            print(message)
+            
+            # Exiting program
+            exit()
+            
+            
+            
 
         self.log.write_log("File: Checks Complete. Starting Client Generation")
 
