@@ -103,10 +103,7 @@ class Main():
 
         # log start of function
         self.log.write_log(
-            "FILE: Verifying directories"
-        )
-        self.log.write_log(
-            f'Verifying the following folders: ',
+            "FILE: Verifying directories",
             directory_list
         )
         
@@ -117,8 +114,8 @@ class Main():
             # raise error informing user that
             # directory is non-existant
             if not os.path.exists(directory):
-                self.log.write_error(FileNotFoundError(f'FILE: File or directory MISSING: {directory}'))
-                raise custom_errors.DirectoriesCheckError(f'File or directory missing: {directory}')
+                self.log.write_error(FileNotFoundError(f'FILE: Directory MISSING: {directory}'))
+                raise custom_errors.DirectoriesCheckError(f'Directory missing: {directory}')
             else:
                 self.log.write_log(f'File: "{directory}" found.')
 
@@ -240,13 +237,11 @@ class Main():
         # if the directories are not valid
         try:
             self.check_directories(
-                self.settings.log_filename,
                 self.settings.images_path,
-                self.settings.csv_directory,
-                f'{self.settings.csv_directory}{self.settings.csv_filename}')
+                self.settings.csv_directory)
         
         except custom_errors.DirectoriesCheckError as DCE:
-            message: str = f'FILE: {DCE}. Exiting program'
+            message: str = f'FILE: Unable to continue without critical directories. Exiting program'
             # Log the error
             self.log.write_error(message)
             print(message)
@@ -255,7 +250,7 @@ class Main():
             exit()
             
         except ValueError as VE:
-            message: str = f'FILE: {VE}. Exiting program'
+            message: str = f'FILE: Critical directories do not contain any files. Exiting program'
             # Log error
             self.log.write_error(message)
             print(message)
