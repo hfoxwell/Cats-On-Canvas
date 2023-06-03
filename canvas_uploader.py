@@ -13,10 +13,11 @@ import os, sys
 from src.Image import imageFactory
 from src.Logger import logger
 from src.CSV import reader
-from src.Clients import client
-from src.Requests import POST_data_canvas
-from src.Config import config
-from src.custom_errors import *
+
+import src.Clients as Clients
+import src.Requests as Requests
+import src.custom_errors as custom_errors
+import src.Config as Config
 
 def check_python_version() -> None:
     '''
@@ -48,13 +49,13 @@ def check_python_version() -> None:
 ##############################
 # FUNCTIONS
 ##############################
-class main():
+class Main():
     '''
         This is the main entry for the program
     '''
     # Class variables
-    log: logger = None
-    settings: config = None
+    log: logger
+    settings: Config.config
 
     def get_settings(self, dir: str):
         ''' Load the settings object '''
@@ -67,7 +68,7 @@ class main():
 
         # Variables
         settings_fileList: list[str] = os.listdir(dir)
-        factory: config.abstract_settings_factory = None
+        factory: Config.abstract_settings_factory
 
         # for all files in the directory
         #   check each file for json or yaml
@@ -75,12 +76,12 @@ class main():
             # Determine the settings file format
             if ".json" in setting_file:
                 # if settings is json format create json parser
-                factory = config.json_factory()
+                factory = Config.json_factory()
                 break
 
-        if factory is None:
+        if not(factory):
             # if settings is yaml format create yaml parser
-            factory = config.yaml_factory()
+            factory = Config.yaml_factory() 
 
         # Create new parser from the instantiated factory
         conf_parser = factory.create_parser()
@@ -117,19 +118,19 @@ class main():
             # directory is non-existant
             if not os.path.exists(directory):
                 self.log.write_error(FileNotFoundError(f'FILE: File or directory MISSING: {directory}'))
-                raise DirectoriesCheckError(f'File or directory missing: {directory}')
+                raise custom_errors.DirectoriesCheckError(f'File or directory missing: {directory}')
             else:
                 self.log.write_log(f'File: "{directory}" found.')
 
             # If folder empty, then raise value error
             if not os.listdir(directory):
                 self.log.write_error(ValueError(f'FILE: Directory EMPTY: {directory}'))
-                raise DirectoriesCheckError(f'Directory is empty: {directory}')
+                raise custom_errors.DirectoriesCheckError(f'Directory is empty: {directory}')
             
-    def Create_student_list(self, client_list: list[client], img_location:str) -> list[client]:
+    def Create_student_list(self, client_list: list[Clients.client], img_location:str) -> list[Clients.client]:
         ''' Returns a list of user objects'''
         # Variables
-        userList: list[client] = []
+        userList: list[Clients.client] = []
 
         # Iterate through list from Csv
         for student in client_list:
@@ -158,7 +159,7 @@ class main():
 
             # Create user object
             try:
-                user: client = client(
+                user: Clients.client = Clients.client(
                     student['client_id'],
                     imgFactory.open_image()
                     )
@@ -193,7 +194,7 @@ class main():
         # Return list of user objects
         return userList
 
-    def process_user(self, user: client, connector: POST_data_canvas):
+    def process_user(self, user: Clients.client, connector: Requests.POST_data_canvas):
         ''' upload a user to canvas '''
         #Step 0: Get canvas user ID via SIS ID
         if not connector.get_canvas_id(user):
@@ -217,7 +218,7 @@ class main():
         ''' Main function for controlling application flow'''
         # Variables
 
-        list_of_clients: list[client] = []
+        list_of_clients: list[Clients.client] = []
 
         #######################################
         # Initalise settings for the program
@@ -239,12 +240,12 @@ class main():
         # if the directories are not valid
         try:
             self.check_directories(
-                self.settings.working_path,
                 self.settings.log_filename,
                 self.settings.images_path,
                 self.settings.csv_directory,
                 f'{self.settings.csv_directory}{self.settings.csv_filename}')
-        except DirectoriesCheckError as DCE:
+        
+        except custom_errors.DirectoriesCheckError as DCE:
             message: str = f'FILE: {DCE}. Exiting program'
             # Log the error
             self.log.write_error(message)
@@ -268,10 +269,12 @@ class main():
         self.log.write_log("File: Checks Complete. Starting Client Generation")
 
         ######################################
-        # Create CSV reader
+        # Create reader
         ######################################
-
-        file_reader: reader.Reader = reader.csv_reader(f'{self.settings.csv_directory}{self.settings.csv_filename}')
+        file_reader: reader.Reader = reader.csv_reader(
+            
+            f'{self.settings.csv_directory}{self.settings.csv_filename}'
+            )
         list_of_clients = file_reader.get_clients()
 
         ######################################
@@ -299,13 +302,14 @@ class main():
         #########################################
         try:
             #  Attempt to connect to canvas
-            connector = POST_data_canvas(self.settings.access_token, self.settings.domain, self.log)
-            pass
+            connector = Requests.POST_data_canvas(self.settings.access_token, self.settings.domain)
+            
         except:
             # If error is reported in connecting to canvas
             self.log.write_error(Exception(f'CONNECTOR: Error connecting to canvas. Exiting application.'))
             print(Exception('Error connecting to canvas, Quitting application'))
             exit()
+            
         self.log.write_log("Successfully created canvas connection. Commencing upload.")
 
         ########################################
@@ -335,5 +339,5 @@ if __name__ == '__main__':
     
     
     # If module is run by itself then run main
-    main = main()       # Create main object
-    main.main()         # Run main from object
+    main_object: object = Main()       # Create main object
+    main_object.main()                 # Run main from object
