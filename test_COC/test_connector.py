@@ -9,7 +9,7 @@
 import requests, json, pytest, string, random
 
 # Internal imports
-from src.Requests import canvas_requests
+from src.Canvas import canvas_requests
 from src.Clients import client
 
 ###################
