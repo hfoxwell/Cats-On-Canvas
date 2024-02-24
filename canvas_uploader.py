@@ -9,6 +9,7 @@
 # External imports
 import os, sys
 
+
 # Internal imports
 from src.Image import imageFactory
 from src.Logger import logger
@@ -59,7 +60,7 @@ class Main:
     log: logger
     settings: Config.config
 
-    def get_settings(self, dir: str):
+    def get_settings(self, directory: str):
         """Load the settings object"""
 
         """
@@ -69,7 +70,7 @@ class Main:
         """
 
         # Variables
-        settings_fileList: list[str] = os.listdir(dir)
+        settings_fileList: list[str] = os.listdir(directory)
         factory: Config.abstract_settings_factory
 
         # for all files in the directory
@@ -89,7 +90,7 @@ class Main:
         conf_parser = factory.create_parser()
 
         # read the settings file using the new parser
-        with open(file=f"./Settings/{settings_fileList[0]}") as settingsFile:
+        with open(file=f"./Settings/{settings_fileList[0]}", encoding='utf-8') as settingsFile:
             if not (conf_parser.read_file(settingsFile)):
                 print("Failed to load settings: Exiting application")
                 exit()

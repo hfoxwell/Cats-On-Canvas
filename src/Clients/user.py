@@ -15,10 +15,10 @@ from src.Image import image
 class client():
     ''' Represents a client '''
 
-    def __init__(self, client_id: str, image: image) -> None:
+    def __init__(self, client_id: str, client_image: image) -> None:
 
         if (len(client_id) < 1):
             raise ValueError("No value for Client ID has been passed")
 
         self.client_id: str = str(client_id)
-        self.image: image = image
+        self.image: image = client_image
