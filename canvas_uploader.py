@@ -63,37 +63,28 @@ class Main:
     def get_settings(self, directory: str):
         """Load the settings object"""
 
-        """
-            TODO: #18 variable is always taken from the first element of the ./Settings directory.
-            It would be better to iterate over all files in the directory and try to load each 
-            one until a valid file is found.
-        """
-
         # Variables
-        settings_fileList: list[str] = os.listdir(directory)
-        factory: Config.abstract_settings_factory
+        settings_file_list: list[str] = os.listdir(directory)
 
         # for all files in the directory
-        #   check each file for json or yaml
-        for setting_file in settings_fileList:
-            # Determine the settings file format
-            if ".json" in setting_file:
-                # if settings is json format create json parser
-                factory = Config.json_factory()
+        for setting_file in settings_file_list:
+            # Determine if settings file is in folder.
+            if ".yaml" in setting_file:
+                # create configuration object
+                conf_parser = Config.YAML_Parser()
+                # read the settings file using the new parser
+                with open(
+                    file=f"./Settings/{settings_file_list[0]}", encoding="utf-8"
+                ) as settings_file:
+                    if not (conf_parser.read_file(settings_file)):
+                        raise FileNotFoundError("Settings file cannot be found.")
+                # Exit loop after conf parser created
                 break
 
-        if not (factory):
-            # if settings is yaml format create yaml parser
-            factory = Config.yaml_factory()
-
-        # Create new parser from the instantiated factory
-        conf_parser = factory.create_parser()
-
-        # read the settings file using the new parser
-        with open(file=f"./Settings/{settings_fileList[0]}", encoding='utf-8') as settingsFile:
-            if not (conf_parser.read_file(settingsFile)):
-                print("Failed to load settings: Exiting application")
-                exit()
+        if not conf_parser:
+            # TODO: make this a custom error. Might no need to exist.
+            print("Fatal error creating settings file. Exiting.")
+            exit()
 
         # return the config object to the program
         return conf_parser.load_config()

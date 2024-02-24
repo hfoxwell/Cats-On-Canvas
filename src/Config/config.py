@@ -37,8 +37,8 @@ class Config():
 class YAML_Parser():
     '''Parses yaml settings'''
 
-    def __init__(self, configuration: Config) -> None:
-        self.configuration: Config = configuration
+    def __init__(self) -> None:
+        self.configuration: Config = Config
         self.Settings_contents = None
 
     def read_file(self, settings_file) -> bool:
