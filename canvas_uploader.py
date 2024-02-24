@@ -58,7 +58,7 @@ class Main:
 
     # Class variables
     log: logger
-    settings: Config.config
+    settings: Config.Config
 
     def get_settings(self, directory: str):
         """Load the settings object"""

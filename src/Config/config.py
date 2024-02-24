@@ -3,26 +3,22 @@
     Date:   04/06/2022
     Purpose:
         Class for parsing and storing settings.
-        Settings shifting from json to YAML.
 '''
 
 # External imports
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 try:
     import yaml
-    import json
-except ImportError:
-    print("YAML can't be loaded importing json")
-    import json
+except ImportError as e:
+    raise ImportError(f"Cannot import YAML parsing package: {e}")
 
 # Internal Imports
 
 
 # Classes
 @dataclass()
-class config():
+class Config():
     '''Store the settings config'''
     # Directory settings
     working_path: str
@@ -38,67 +34,12 @@ class config():
     csv_filename: str
 
 
-class Settings_parser(ABC):
-    '''Base class for parsing settings to an object'''
-
-    def __init__(self, config: config) -> None:
-        ''' Initialises a parser with default values that can be overridden '''
-        self.configuration: config = config
-        self.Settings_contents = None
-
-    @abstractmethod
-    def read_file(self, settings_file) -> bool:
-        ''' Read the file '''
-
-    @abstractmethod
-    def load_config(self) -> config:
-        ''' Load config with data'''
-
-
-class json_parser(Settings_parser):
-    '''Parses json settings'''
-
-    def __init__(self, config: config) -> None:
-        super().__init__(config)
-
-    def read_file(self, settings_file) -> bool:
-        ''' Reads the settings file'''
-
-        # Try to read json settings
-        try:
-            self.settings_contents = json.load(settings_file)
-
-        # If decode of json file fails catch error and report
-        except Exception as e:
-            print(e)
-            print('An issue occurred with the settings.json')
-            return False
-
-        # On success. Return true
-        print("SUCCESS: settings loaded")
-        return True
-
-    def load_config(self) -> config:
-        '''Creates a config object'''
-
-        conf: config = self.configuration(
-            working_path=self.settings_contents['working_path'],
-            access_token=self.settings_contents['access_token'],
-            domain=self.settings_contents['domain'],
-            csv_directory=self.settings_contents['csv_directory'],
-            csv_filename=self.settings_contents['csv_filename'],
-            images_path=self.settings_contents['images_path'],
-            log_filename=self.settings_contents['log_filename']
-        )
-
-        return conf
-
-
-class yaml_parser(Settings_parser):
+class YAML_Parser():
     '''Parses yaml settings'''
 
-    def __init__(self, config: config) -> None:
-        super().__init__(config)
+    def __init__(self, configuration: Config) -> None:
+        self.configuration: Config = configuration
+        self.Settings_contents = None
 
     def read_file(self, settings_file) -> bool:
         ''' Read the config from Yaml file '''
@@ -124,11 +65,9 @@ class yaml_parser(Settings_parser):
         print("SUCCESS: Settings Loaded")
         return True
 
-    def load_config(self) -> config:
+    def load_config(self) -> Config:
         ''' load a config'''
-        # Variables
-        conf: config = None
-
+        
         conf = self.configuration(
             working_path=self.Settings_contents['Directories']['working_path'],
             access_token=self.Settings_contents['Canvas_data']['access_token'],
@@ -140,25 +79,3 @@ class yaml_parser(Settings_parser):
         )
 
         return conf
-
-
-# Factories
-class abstract_settings_factory(ABC):
-    ''' Abstract factory class '''
-    @abstractmethod
-    def create_parser(self) -> Settings_parser:
-        ''' Create a parser '''
-
-
-class json_factory(abstract_settings_factory):
-    ''' Returns a json parser '''
-
-    def create_parser(self) -> Settings_parser:
-        return json_parser(config)
-
-
-class yaml_factory(abstract_settings_factory):
-    ''' returns a yaml parser'''
-
-    def create_parser(self) -> Settings_parser:
-        return yaml_parser(config)
