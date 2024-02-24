@@ -19,6 +19,7 @@ import src.Clients as Clients
 import src.Canvas as Canvas
 import src.custom_errors as custom_errors
 import src.Config as Config
+import src.Settings as Settings
 
 
 def check_python_version() -> None:
@@ -55,39 +56,16 @@ class Main:
     """
     This is the main entry for the program
     """
+    # Constants
+    SETTINGS_DIRECTORY = './Settings/'
 
     # Class variables
     log: logger
     settings: Config.Config
-
-    def get_settings(self, directory: str):
-        """Load the settings object"""
-
-        # Variables
-        settings_file_list: list[str] = os.listdir(directory)
-
-        # for all files in the directory
-        for setting_file in settings_file_list:
-            # Determine if settings file is in folder.
-            if ".yaml" in setting_file:
-                # create configuration object
-                conf_parser = Config.YAML_Parser()
-                # read the settings file using the new parser
-                with open(
-                    file=f"./Settings/{settings_file_list[0]}", encoding="utf-8"
-                ) as settings_file:
-                    if not (conf_parser.read_file(settings_file)):
-                        raise FileNotFoundError("Settings file cannot be found.")
-                # Exit loop after conf parser created
-                break
-
-        if not conf_parser:
-            # TODO: make this a custom error. Might no need to exist.
-            print("Fatal error creating settings file. Exiting.")
-            exit()
-
-        # return the config object to the program
-        return conf_parser.load_config()
+    
+    def __init__(self) -> None:
+        self.settings_loader = Settings.SettingsLoader()
+        self.settings_parser = Config.YAML_Parser()
 
     def check_directories(self, *directory_list) -> None:
         """
@@ -131,16 +109,7 @@ class Main:
         # Iterate through list from Csv
         for student in client_list:
 
-            """
-            TODO: Find a way to create the user object so that MAIN does not need to be aware of clients.
-            This may need a controller or something along those lines.
-            """
-            """
-            TODO: Main is too busy. This needs to be a more single responsibility function. rewrite this so
-            that main is only responsible for working with the controllers. This may mean creating
-            some controllers.
-            """
-
+            # Write to logfile the current student being processed
             self.log.write_log(f"Current Student: {student}")
 
             # confirm user's image exists in directory
@@ -227,7 +196,8 @@ class Main:
         # Initalise settings for the program
         #######################################
         # Get the settings config from the file
-        self.settings = self.get_settings("Settings/")
+        settings_file_path = self.settings_loader.find_settings_file(self.SETTINGS_DIRECTORY)
+        self.settings = self.settings_loader.load_settings(settings_file_path, self.settings_parser)
 
         #######################################
         # Initalise the log
@@ -246,7 +216,7 @@ class Main:
                 self.settings.images_path, self.settings.csv_directory
             )
 
-        except custom_errors.DirectoriesCheckError as DCE:
+        except custom_errors.DirectoriesCheckError:
             message: str = (
                 f"FILE: Unable to continue without critical directories. Exiting program"
             )
@@ -257,7 +227,7 @@ class Main:
             # exiting program
             exit()
 
-        except ValueError as VE:
+        except ValueError:
             message: str = (
                 f"FILE: Critical directories do not contain any files. Exiting program"
             )
@@ -287,7 +257,7 @@ class Main:
 
         # Now that users have been created upload them to canvas
         # if no users have been created. Then EXIT the program
-        if len(user_list):
+        if len(user_list) > 0:
             self.log.write_log(
                 f"All possible users have been created. A total of {len(user_list)}"
             )
@@ -306,7 +276,7 @@ class Main:
                 self.settings.access_token, self.settings.domain
             )
 
-        except:
+        except Exception:
             # If error is reported in connecting to canvas
             self.log.write_error(
                 Exception(
