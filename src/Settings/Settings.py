@@ -7,7 +7,6 @@ Purpose:
 '''
 # External imports
 import os
-import mimetypes
 
 
 class SettingsLoader:
