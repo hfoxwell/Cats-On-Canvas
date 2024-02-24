@@ -2,7 +2,7 @@
 Author: H Foxwell
 Date: 25/02/2024
 Purpose:
-    Class used to separate some respnsibility from the main file regarding the 
+    Class used to separate some respnsibility from the main file regarding the
     processing of the config.
 '''
 # External imports
@@ -12,10 +12,10 @@ import mimetypes
 
 class SettingsLoader:
     ''' Class used to create configuration object'''
-    
+
     def find_settings_file(self, directory: str) -> str:
         ''' Finds the settings file in the given directory'''
-        
+
         # Variables
         settings_file_list: list[str] = os.listdir(directory)
 
@@ -30,7 +30,7 @@ class SettingsLoader:
 
     def load_settings(self, file_path: str, parser):
         ''' Creates the settings parser object using the file path from 'find_settings_file'''
-        # Open file path 
+        # Open file path
         with open(file=file_path, encoding="utf-8") as settings_file:
             # If file cannot be opened or processed
             if not (parser.read_file(settings_file)):
