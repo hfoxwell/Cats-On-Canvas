@@ -19,6 +19,8 @@ from abc import ABC, abstractmethod
 
 class sourceFile(ABC):
     '''Abstract class for opening a file type'''
+    open_file = None
+    
     @abstractmethod
     def __init__(self, input_file: str) -> None:
         '''Initialise the source file'''
@@ -41,6 +43,8 @@ class sourceFile(ABC):
 
 class csv_Source(sourceFile):
     '''Opens CSV files for reading'''
+    # Valid file extensions
+    file_extensions = ['.csv', '.txt']
 
     def __init__(self, input_file: str) -> None:
         '''initialise a file opener'''
@@ -53,11 +57,10 @@ class csv_Source(sourceFile):
 
     def _verify_file(self, file: str):
         # Variables
-        file_extensions = ['.csv', '.txt']
-        current_file_extension: str = os.path.splitext(file)
+        _,current_file_extension = os.path.splitext(file)
 
         # Verify the type of the file
-        if not(current_file_extension in file_extensions):
+        if not(current_file_extension in self.file_extensions):
             raise AttributeError(
                 f"Expected CSV file: {current_file_extension}")
 
@@ -66,9 +69,9 @@ class csv_Source(sourceFile):
         #       instead it returns the file handle passed
         # open the file
         open_file: TextIOWrapper = None
-        open_file = open(file, mode)
+        open_file = open(file, mode, encoding='utf-8')
         # return file object to caller
-        return file
+        return open_file
 
     def __del__(self):
         # Close the open file

@@ -16,6 +16,7 @@ from src.Logger import logger
 from src.CSV import reader
 
 import src.Clients as Clients
+import src.File as SourceFile
 import src.Canvas as Canvas
 import src.custom_errors as custom_errors
 import src.Config as Config
@@ -241,10 +242,17 @@ class Main:
         self.log.write_log("File: Checks Complete. Starting Client Generation")
 
         ######################################
+        # Create sourcefile
+        ######################################
+        source: SourceFile.sourceFile = SourceFile.csv_Source(
+            f"{self.settings.csv_directory}{self.settings.csv_filename}"
+            )
+        
+        ######################################
         # Create reader
         ######################################
         file_reader: reader.Reader = reader.csv_reader(
-            f"{self.settings.csv_directory}{self.settings.csv_filename}"
+            sourceFile=source
         )
         list_of_clients = file_reader.get_clients()
 
