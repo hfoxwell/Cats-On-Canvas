@@ -43,11 +43,11 @@ class csv_reader(Reader):
         ''' Initialise a reader with a source '''
 
         # Verify that sourcefile is CSV filetype
-        if (type(sourceFile) != type(csv_Source)):
-            raise TypeError(f"Incorrect source file type: {sourceFile}")
+        # if (issubclass(sourceFile, csv_Source)):
+        #     raise TypeError(f"Incorrect source file type: {sourceFile}")
 
         # Assign source file
-        self.source_file = sourceFile.file
+        self.source_file = sourceFile.open_file
 
     def get_clients(self) -> list:
         ''' Read clients from csv and return details'''

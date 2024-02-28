@@ -9,14 +9,14 @@ from datetime import datetime
 import os
 
 # internal imports
-from src.Config import config
+from src.Config import Config
 
 
 # Class for file
 class logger:
     ''' Class for logging events '''
 
-    def __init__(self, settings: config) -> None:
+    def __init__(self, settings: Config) -> None:
         ''' Initialise the logger'''
 
         # Variables

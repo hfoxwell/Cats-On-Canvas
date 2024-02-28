@@ -1,9 +1,0 @@
-{
-    "working_path" : "./",
-    "access_token" : "",
-    "domain" : "",
-    "csv_directory" : "CSV_data/",
-    "csv_filename" : "data.csv",
-    "images_path" : "Images/",
-    "log_filename" : "Log.txt"
-}

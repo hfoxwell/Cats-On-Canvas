@@ -10,7 +10,7 @@ import pytest
 from pytest import MonkeyPatch
 
 # Internal imports
-from src.Config import config
+from src.Config import Config
 from src.Config import json_factory
 from src.Config import yaml_factory
 from src.Config import json_parser
@@ -46,7 +46,7 @@ def test_factory_yaml():
 
 def test_json_parser(monkeypatch: MonkeyPatch):
 
-    jParser = json_parser(config)
+    jParser = json_parser(Config)
 
     assert jParser.configuration != None
     assert jParser.Settings_contents == None

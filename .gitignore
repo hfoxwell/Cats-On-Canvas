@@ -135,3 +135,6 @@ Log.txt
 Settings/settings.json
 CSV_data/data.csv
 Images/1042800.jpeg
+
+# Visual studio code
+.vscode
