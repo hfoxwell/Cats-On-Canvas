@@ -1,8 +1,0 @@
-{
-    "python.linting.enabled": false,
-    "python.testing.pytestArgs": [
-        "test_COC"
-    ],
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true
-}
