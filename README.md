@@ -1,25 +1,23 @@
 # Canvas Avatar Updater ()
 
 This program will allow for the large scale updating of user avatars in Canvas. 
-Initally it will use a known list of students and their pre-populated images to 
+Initially it will use a known list of students and their pre-populated images to 
 update the canvas avatars. 
 > Note This is a redesign of: https://github.com/kat3su/CanvasMassAvatarUploadSISID
 
-The opertion of this program is explained and detailed within this document.
+The operation of this program is explained and detailed within this document.
 This is outlined in the following segments:
 
 ### Contents
 1. CSV_FILE
-2. Settings **
+2. Settings
 3. Images
 4. Operation
-
-> ** Note Updates to settings change the functionality of the project.
 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 
 
 ## CSV_File
-This is the file which is the source of all user (student) details, neccesary for the updating
+This is the file which is the source of all user (student) details, necessary for the updating
 of the avatars. The file is comprised of 3 columns; the first contains the user's ID number, the second contains the image name for their avatar, and the third contains the type of file which the image is encoded in.
 
 The structure is as follows:
@@ -64,47 +62,10 @@ classDiagram
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ## Settings 
 
-To remove the need to edit the script. A settings file is used. This file is encoded in the Json or Yaml format. This allows for simple use of 'tags' which denote the name of the setting with the value being assigned.  
+To remove the need to edit the script. A settings file is used. This file is encoded in Yaml format. This allows for simple use of 'tags' which denote the name of the setting with the value being assigned.  
 
-**ONLY ONE OF THESE FILES SHOULD EXIST AT A TIME.**  
-
-
-### Default state - JSON Settings ( Available on all python systems )
-The default state for the settings file as found in this repository is as follows:
-``` json
-{
-    "working_path" : "./",
-    "access_token" : "",
-    "domain" : "",
-    "csv_directory" : "CSV_data/",
-    "csv_filename" : "data.csv",
-    "images_path" : "Images/",
-    "log_filename" : "Log.txt"
-}
-
-```
-Each of the 'tags' represents a setting in the program. Their values are indicated on the right of the ":". Each setting is required for the program to operate and their purpose is as follows:
-
-- Working_path:
-    - Is the working directory of the script. This is used to make elements of the program aware of the programs home directory. 
-- access_token:
-    - This token is the admin access token for canvas. Without this token, the program will not be able to authenticate with canvas. You may need to speak with a relevant admin to get this token.
-- domain:
-    - The domain is your institution's domain. This allows for the API to target the specific instance of canvas running for your institution.
-- CSV_directory:
-    - This is the directory, relevant to the working path, of the csv file which contains the student/images data.
-- CSV_filename:
-    - This is the name of the file which contains all student/image data.
-- images_path:
-    - This is the path to the folder for the images. This, by default, is contained in the home directory of the application.
-- log_filename:
-    - The name of the log file. This should be logging the internal actions of the script. If any errors are occuring they will be logged here. 
-
-
-### YAML State - More verbose, use if settings are frequently edited
-
-This settings format is best used when the system admin may need to frequently edit the file. OR this file needs to be exposed to a user who is not technical by trade. This file can include comments and allows for a clearer explanation of each element so that the Admin can indicate the purpose of each element.  
-
+> Important   
+> As the YAML parser is an external library, you will need to ensure that you have the external library installed.
 ``` YAML
 ---
 # Outline the directories to be used by the application
@@ -113,7 +74,7 @@ Directories:
   csv_directory: "CSV_data/"                    # The Directory (from root) of the CSV data
   images_directory: "Images/"                   # The Directory (from root) of the user images
 
-# Canvas specific information requried for authentication
+# Canvas specific information required for authentication
 Canvas_data:
   domain: ""                                    # Local canvas implementation domain EG: <org>.instructure.com 
   access_token: ""                              # Access token to authenticate with canvas
@@ -123,19 +84,21 @@ File_names:
   csv_filename: "data.csv"                      # Name of the csv file within the csv directory
   log_filename: "Log.txt"                       # Name of the log file within the root directory
 ```
-> Important   
-> The YAML file is mutually exclusive with the JSON settings file. They should not be used together. Only one of the two will be parsed for settings. Furthermore, YAML is not standard on python installations. So an external library will have to be installed. 
-
-### YAML Settings
-The contents of the yaml file are exactly the same as the JSON descriptors above. The layout is slightly different. Do not remove the headings or un-indent the subheadings.
 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ## Images
 Canvas supports only a small subset of images. 
 
+- PNG
+- JPG
+- GIF
+
 ### Images folder
 The images folder is used to store the images for the application. This folder can be located in any directory. To change the programs location for this folder, edit the image folder path in the settings.json file. 
+
+> Important
+> Canvas recommends that your image file be as small as possible for the image being uploaded. Use compression where possible. 
 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -248,9 +211,9 @@ Even if a user has changed their avatar. The software will upload, or replace a 
   "size": 32649
 }
 ```
-This object is the most important in the updating element of the program. It contains all the parameters which will be set by the program. This object can be used to verify that an object has been appropriatly updated. The following elements serve a purpose in the program:
+This object is the most important in the updating element of the program. It contains all the parameters which will be set by the program. This object can be used to verify that an object has been appropriately updated. The following elements serve a purpose in the program:
 
 - Tags:
     - **token** : The Individual token for each image. This should be unique to the image.
     - **content-type**: This is the file type of the image. Canvas auto-detects this or it is set by the program.
-    - **filename**: This is the student's SIS id from the csv. This will be set by the program, if this is not set to the student's ID then the an internal error occured, or a user has changed their profile picture.
+    - **filename**: This is the student's SIS id from the csv. This will be set by the program, if this is not set to the student's ID then the an internal error occurred, or a user has changed their profile picture.
