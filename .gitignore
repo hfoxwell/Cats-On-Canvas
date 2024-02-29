@@ -138,3 +138,6 @@ Images/1042800.jpeg
 
 # Visual studio code
 .vscode
+
+# Untrack Settings file
+Settings/*
