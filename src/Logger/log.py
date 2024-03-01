@@ -5,73 +5,24 @@
         Class for logging to file
 '''
 # External imports
-from datetime import datetime
-import os
+import json
 
 # internal imports
-from src.Config import Config
 
+import logging
+import logging.config
 
-# Class for file
-class logger:
-    ''' Class for logging events '''
+def open_log_config(config_path: str):
+    '''Opens the logging config file'''
+    with open(config_path, 'r', encoding='utf-8') as conf_file:
+        log_config = json.load(conf_file)
 
-    def __init__(self, settings: Config) -> None:
-        ''' Initialise the logger'''
+        return log_config
 
-        # Variables
-        self.log_file_path = settings.working_path
-        self.log_file_name = settings.log_filename
-        self.log_file = None
+def configure_logging(log_config_path: str, name: str) -> logging.Logger:
+    '''Creates logger and configures the logger with dict_config'''
+    logger = logging.getLogger(name)
+    log_config = open_log_config(log_config_path)
 
-        ''' Create the log file '''
-        # Check if logfile exists
-        log_path: str = f'{self.log_file_path}{self.log_file_name}'
-        file_exits = os.path.exists(log_path)
-
-        try:
-            if file_exits:
-                # If file exists open file for append
-                self.log_file = open(log_path, 'a')
-                self.log_file.write("#" * 10)
-                self.log_file.write(
-                    f'Log file opened @ {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
-                self.log_file.write("#" * 10)
-                self.log_file.write('\n')
-            else:
-                # If file does not exist, create file for writing
-                self.log_file = open(log_path, 'x')
-
-                # Write log created
-                self.log_file.write('#' * 20)
-                self.log_file.write(
-                    "log file Created @ {}".format(datetime.now().strftime(
-                        "%d/%m/%Y %H:%M:%S")))
-                self.log_file.write(f'{"#" * 20}\n')
-
-        except OSError as e:
-            print(
-                f'Error creating/accessing log file {self.log_file_name}, Error: {e}')
-            exit()
-
-    def write_log(self, *content) -> bool:
-        ''' Writes to the log file automatically appends time'''
-        try:
-            for item in content:
-                self.log_file.write(
-                    f'{item} @ {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}\n')
-
-        except OSError as e:
-            print(
-                f'Error writing to log file {self.log_file_name}, Error: {e}\n')
-            return False
-
-        return True
-
-    def write_error(self, error):
-        ''' Writes an error to log '''
-        self.write_log(f'The following error occurred: {error}\n')
-
-    def close_log(self):
-        ''' Closes the log file '''
-        self.log_file.close()
+    logging.config.dictConfig(config=log_config)
+    return logger

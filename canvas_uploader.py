@@ -12,7 +12,7 @@ import os, sys
 
 # Internal imports
 from src.Image import imageFactory
-from src.Logger import logger
+from src.Logger import configure_logging
 from src.CSV import reader
 
 import src.Clients as Clients
@@ -61,7 +61,6 @@ class Main:
     SETTINGS_DIRECTORY = './Settings/'
 
     # Class variables
-    log: logger
     settings: Config.Config
     
     def __init__(self) -> None:
@@ -75,7 +74,7 @@ class Main:
         """
 
         # log start of function
-        self.log.write_log("FILE: Verifying directories", directory_list)
+        self.log.info("FILE: Verifying directories %".format(directory_list))
 
         # Verify the folders
         for directory in directory_list:
@@ -84,18 +83,18 @@ class Main:
             # raise error informing user that
             # directory is non-existant
             if not os.path.exists(directory):
-                self.log.write_error(
+                self.log.exception(
                     FileNotFoundError(f"FILE: Directory MISSING: {directory}")
                 )
                 raise custom_errors.DirectoriesCheckError(
                     f"Directory missing: {directory}"
                 )
             else:
-                self.log.write_log(f'File: "{directory}" found.')
+                self.log.info(f'File: "{directory}" found.')
 
             # If folder empty, then raise value error
             if not os.listdir(directory):
-                self.log.write_error(ValueError(f"FILE: Directory EMPTY: {directory}"))
+                self.log.exception(ValueError(f"FILE: Directory EMPTY: {directory}"))
                 raise custom_errors.DirectoriesCheckError(
                     f"Directory is empty: {directory}"
                 )
@@ -111,7 +110,7 @@ class Main:
         for student in client_list:
 
             # Write to logfile the current student being processed
-            self.log.write_log(f"Current Student: {student}")
+            self.log.info(f"Current Student: {student}")
 
             # confirm user's image exists in directory
             try:
@@ -121,10 +120,10 @@ class Main:
                 )
             except OSError as e:
                 # if error raised by factory, image does not exits.
-                self.log.write_error(
+                self.log.exception(
                     FileNotFoundError(f'FILE: {e} {student["image_filename"]}')
                 )
-                self.log.write_log(
+                self.log.info(
                     f'USER: user, {student["client_id"]} Skipped as no image could be found'
                 )
                 continue
@@ -137,7 +136,7 @@ class Main:
             except Exception as user_error:
                 # Catch error creating user
                 # Write this to log
-                self.log.write_error(
+                self.log.exception(
                     f'USER: Could not create user {student["client_id"]} : {user_error}'
                 )
                 continue
@@ -145,10 +144,9 @@ class Main:
             ###################
             # Print out created user details
             ###################
-            print(
-                f"Creating User: {user.client_id}",
+            self.log.info(
+                f"Creating User: {user.client_id}\t",
                 f"With Image: {user.image.image_name}",
-                sep="\t",
             )
 
             # Add user object to list of users
@@ -157,8 +155,7 @@ class Main:
         ###############################
         # Console & log Number of users
         ###############################
-        self.log.write_log(f"Total of {len(userList)} users created")
-        print(f"Total of {len(userList)} users created")
+        self.log.info(f"Total of {len(userList)} users created")
 
         # Return list of user objects
         return userList
@@ -168,20 +165,20 @@ class Main:
         # Step 0: Get canvas user ID via SIS ID
         if not connector.get_canvas_id(user):
             # If connector cannot get user id skip user
-            self.log.write_log(f"CANVAS: Skipping user: {user.client_id}")
+            self.log.info(f"CANVAS: Skipping user: {user.client_id}")
             return
 
         # Step 1: Start upload file to user's file storage
         if not connector.upload_user_data(user):
             # if no upload happened log and next student
-            self.log.write_log(
+            self.log.info(
                 f"CANVAS: Skipping user: {user.client_id} File could not be uploaded"
             )
             return
 
         # Step 2: Make API call to set avatar image
         if not connector.set_image_as_avatar(user):
-            self.log.write_error(
+            self.log.warning(
                 f"CANVAS: Error changing profile picture for: {user.client_id}"
             )
             return
@@ -203,7 +200,7 @@ class Main:
         #######################################
         # Initalise the log
         #######################################
-        self.log = logger(self.settings)
+        self.log = configure_logging("Settings/log_config.json", __name__)
 
         #########################################
         # Verify that directories exist
@@ -222,8 +219,7 @@ class Main:
                 f"FILE: Unable to continue without critical directories. Exiting program"
             )
             # Log the error
-            self.log.write_error(message)
-            print(message)
+            self.log.exception(message)
 
             # exiting program
             exit()
@@ -233,13 +229,12 @@ class Main:
                 f"FILE: Critical directories do not contain any files. Exiting program"
             )
             # Log error
-            self.log.write_error(message)
-            print(message)
+            self.log.exception(message)
 
             # Exiting program
             exit()
 
-        self.log.write_log("File: Checks Complete. Starting Client Generation")
+        self.log.info("File: Checks Complete. Starting Client Generation")
 
         ######################################
         # Create sourcefile
@@ -266,13 +261,12 @@ class Main:
         # Now that users have been created upload them to canvas
         # if no users have been created. Then EXIT the program
         if len(user_list) > 0:
-            self.log.write_log(
+            self.log.info(
                 f"All possible users have been created. A total of {len(user_list)}"
             )
-            self.log.write_log(f"Creating canvas object...")
+            self.log.info(f"Creating canvas object...")
         else:
-            print("No users were created. Closing application")
-            self.log.write_error("USER: no users were found. Exiting..")
+            self.log.warning("USER: no users were found. Exiting..")
             exit()
 
         #########################################
@@ -284,17 +278,16 @@ class Main:
                 self.settings.access_token, self.settings.domain
             )
 
-        except Exception:
+        except Exception as e:
             # If error is reported in connecting to canvas
-            self.log.write_error(
+            self.log.exception(
                 Exception(
-                    f"CONNECTOR: Error connecting to canvas. Exiting application."
+                    f"CONNECTOR: Error connecting to canvas: {e}"
                 )
             )
-            print(Exception("Error connecting to canvas, Quitting application"))
             exit()
 
-        self.log.write_log("Successfully created canvas connection. Commencing upload.")
+        self.log.info("Successfully created canvas connection. Commencing upload.")
 
         ########################################
         # For each user Start upload process
@@ -308,7 +301,7 @@ class Main:
 
             # Confirm in the console that user has been uploaded...
             # Increment after upload is completed
-            print(f"Finished {count_of_uploaded_users} of {len(user_list)} users")
+            self.log.info(f"Finished {count_of_uploaded_users} of {len(user_list)} users")
             count_of_uploaded_users += 1
 
 

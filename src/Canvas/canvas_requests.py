@@ -44,12 +44,12 @@ class Canvas_connector(ABC):
         self.log: logging.Logger = logging.getLogger(__name__)
 
         # Log initialised values
-        self.log.write_log(
-            "CANVAS: initialised values:",
-            f"Auth Token:\t {self.Auth_token}",
-            f"Domain:\t {self.domain}",
-            f"Header:\t {self.header}",
-            f"Params:\t {self.params}",
+        self.log.info(
+            "CANVAS: initialised values:\n" +
+            f"Auth Token:\t {self.Auth_token}\n" +
+            f"Domain:\t {self.domain}\n" +
+            f"Header:\t {self.header}\n" +
+            f"Params:\t {self.params}\n"
         )
         # Call Canvas Test function
         self.test_canvas_connection()
@@ -65,11 +65,11 @@ class Canvas_connector(ABC):
 
         if res.status_code == desired_result:
             # If result 200 then return true
-            self.log.write_log("CANVAS: Connection Successfully Tested")
+            self.log.info("CANVAS: Connection Successfully Tested")
             return True
         else:
             # If other result received return false
-            self.log.write_error(
+            self.log.exception(
                 ConnectionRefusedError(
                     f"Canvas Refused the connection: {res.status_code}"
                 )
@@ -99,7 +99,7 @@ class POST_data_canvas(Canvas_connector):
     async def get_canvas_id(self, user: client) -> bool:
         """Gets a user ID from Canvas"""
         # Write log with user ID
-        self.log.write_log(f"USER: Getting Canvas ID for: {user.client_id}")
+        self.log.info(f"USER: Getting Canvas ID for: {user.client_id}")
 
         # Send get request for a user's canvas id. This is
         # different from their SIS id
@@ -116,7 +116,7 @@ class POST_data_canvas(Canvas_connector):
             return True
         else:
             # If not found, return an error to the log with the SIS id
-            self.log.write_error(f"USER: {user.client_id} cannot be found in canvas")
+            self.log.exception(f"USER: {user.client_id} cannot be found in canvas")
             return False
 
     async def upload_user_data(self, user: client) -> bool:
@@ -169,7 +169,7 @@ class POST_data_canvas(Canvas_connector):
         else:
             # If another value returns then there was an issue
             # Exit the application
-            self.log.write_error("CANVAS: File upload Failed")
+            self.log.error("CANVAS: File upload Failed")
             return False
 
         # Get file ID From canvas
@@ -177,7 +177,7 @@ class POST_data_canvas(Canvas_connector):
             # If file ID is found then set it for the image
             user.image.image_canvas_id = confirmation.json()["id"]
         else:
-            self.log.write_error("CANVAS: No file ID found for uploaded file")
+            self.log.error("CANVAS: No file ID found for uploaded file")
 
         # Successfully uploaded file
         return True
@@ -186,7 +186,7 @@ class POST_data_canvas(Canvas_connector):
         """Sets and image to be a users PFP"""
 
         # Log that Canvas avatar is being updated
-        self.log.write_log(
+        self.log.info(
             f"Setting canvas Avatar for: {user.client_id} To: {user.image.image_name}"
         )
 
@@ -223,12 +223,12 @@ class POST_data_canvas(Canvas_connector):
 
         # If the canvas response is 200, then the update has been successful
         if set_avatar_user.status_code == 200:
-            self.log.write_log(f"success updating user avatar for: {user.client_id}")
+            self.log.info(f"success updating user avatar for: {user.client_id}")
 
             return True
         else:
             # If the update was not successful, log the result
-            self.log.write_error(
+            self.log.error(
                 f"CANVAS: Error updating avatar for: {user.client_id},"
                 + f" error: {set_avatar_user.status_code}"
             )

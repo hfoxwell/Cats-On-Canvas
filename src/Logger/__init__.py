@@ -1,7 +1,7 @@
 # -------------------------
 # init file for logger module
 
-# import 
+# import
 
 # local imports
-from .log import logger
+from .log import configure_logging
