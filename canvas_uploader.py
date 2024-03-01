@@ -74,7 +74,7 @@ class Main:
         """
 
         # log start of function
-        self.log.info("FILE: Verifying directories %".format(directory_list))
+        self.log.info("FILE: Verifying directories {}".format(directory_list))
 
         # Verify the folders
         for directory in directory_list:
@@ -145,7 +145,7 @@ class Main:
             # Print out created user details
             ###################
             self.log.info(
-                f"Creating User: {user.client_id}\t",
+                f"Creating User: {user.client_id}\t\n" +
                 f"With Image: {user.image.image_name}",
             )
 
