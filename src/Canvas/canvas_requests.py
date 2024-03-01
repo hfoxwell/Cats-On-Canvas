@@ -96,7 +96,7 @@ class POST_data_canvas(Canvas_connector):
         """For passing information to canvas"""
         super().__init__(Token, domain)
 
-    async def get_canvas_id(self, user: client) -> bool:
+    def get_canvas_id(self, user: client) -> bool:
         """Gets a user ID from Canvas"""
         # Write log with user ID
         self.log.info(f"USER: Getting Canvas ID for: {user.client_id}")
@@ -119,7 +119,7 @@ class POST_data_canvas(Canvas_connector):
             self.log.exception(f"USER: {user.client_id} cannot be found in canvas")
             return False
 
-    async def upload_user_data(self, user: client) -> bool:
+    def upload_user_data(self, user: client) -> bool:
         """Upload image to users files"""
         # Variables
         url: str = self.domain + "/users/self/files"
@@ -182,7 +182,7 @@ class POST_data_canvas(Canvas_connector):
         # Successfully uploaded file
         return True
 
-    async def set_image_as_avatar(self, user: client) -> bool:
+    def set_image_as_avatar(self, user: client) -> bool:
         """Sets and image to be a users PFP"""
 
         # Log that Canvas avatar is being updated
