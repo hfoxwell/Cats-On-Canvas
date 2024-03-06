@@ -6,21 +6,11 @@
         server and the canvas API.
 """
 
-"""
-    - Use type annotations more consistently throughout the code to improve readability and maintainability.
-    - Use requests.Session() to reduce the overhead of repeatedly sending authentication headers with every request.
-    - Instead of raising an error when the connection test fails, return a boolean False value instead. This allows the caller to handle the error more gracefully.
-    - Use more descriptive function names to make it easier to understand what each function does.
-    - Add more error handling to the upload_user_data() function to handle potential errors that might occur during the file upload process.
-    - Instead of using async and await keywords with get_canvas_id() and upload_user_data() functions, use the standard synchronous approach since there are no asynchronous operations in those functions.
-    - Consider using f-strings or str.format() to format log messages more succinctly and consistently.
-"""
-
 # External imports
 from abc import ABC, abstractmethod
-import requests
 import json
 import logging
+import requests
 
 # Internal imports
 from src.Clients import client
@@ -29,8 +19,24 @@ from src.Clients import client
 class Canvas_connector(ABC):
     """Abstract base class for canvas connector"""
 
+    @abstractmethod
+    def get_canvas_id(self, user: client) -> bool:
+        """Gets internal canvas ID from student ID in SIS. Returns bool (true) on success"""
+
+    @abstractmethod
+    def upload_user_data(self, user: client) -> bool:
+        """Uploads user data to canvas. Returns bool (true) on success"""
+
+    @abstractmethod
+    def set_image_as_avatar(self, user: client) -> bool:
+        """Sets and image to be a users PFP"""
+
+
+class POST_data_canvas(Canvas_connector):
+    """Posts data to canvas"""
+
     def __init__(self, Token: str, domain: str) -> None:
-        """Initialise a connector"""
+        """For passing information to canvas"""
         self.Session = requests.Session()
         # TODO: implement the sessions system from requests, to save on request information
         self.Auth_token: str = Token
@@ -75,26 +81,6 @@ class Canvas_connector(ABC):
                 )
             )
             raise ConnectionRefusedError("Canvas Refused the connection")
-
-    @abstractmethod
-    def get_canvas_id(self, user: client) -> bool:
-        """Gets internal canvas ID from student ID in SIS. Returns bool (true) on success"""
-
-    @abstractmethod
-    def upload_user_data(self, user: client) -> bool:
-        """Uploads user data to canvas. Returns bool (true) on success"""
-
-    @abstractmethod
-    def set_image_as_avatar(self, user: client) -> bool:
-        """Sets and image to be a users PFP"""
-
-
-class POST_data_canvas(Canvas_connector):
-    """Posts data to canvas"""
-
-    def __init__(self, Token: str, domain: str) -> None:
-        """For passing information to canvas"""
-        super().__init__(Token, domain)
 
     def get_canvas_id(self, user: client) -> bool:
         """Gets a user ID from Canvas"""
