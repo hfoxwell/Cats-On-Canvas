@@ -9,19 +9,12 @@
 #   These objects should be renamed to parser.
 #   So as to parse sourceFile to objects
 
+import csv
 # External imports
 from abc import ABC, abstractmethod
-import csv
 
 # Internal Imports
-from src.File import sourceFile, csv_Source
-
-##########
-'''
-    TODO: This needs to be Dependency injected.
-    It currently is too coupled on CSV_source
-'''
-##########
+from src.File import sourceFile
 
 
 # File Class
@@ -36,7 +29,7 @@ class Reader(ABC):
         ''' Returns list of clients from file'''
 
 
-class csv_reader(Reader):
+class CSVReader(Reader):
     ''' read CSV files '''
 
     def __init__(self, sourceFile: sourceFile) -> None:

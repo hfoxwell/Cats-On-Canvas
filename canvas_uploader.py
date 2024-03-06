@@ -246,7 +246,7 @@ class Main:
         ######################################
         # Create reader
         ######################################
-        file_reader: reader.Reader = reader.csv_reader(
+        file_reader: reader.Reader = reader.CSVReader(
             sourceFile=source
         )
         list_of_clients = file_reader.get_clients()
