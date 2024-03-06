@@ -100,7 +100,7 @@ class Main:
                 )
 
     def Create_student_list(
-        self, client_list: list[Clients.client], img_location: str
+        self, client_list: list[dict[str, str]], img_location: str
     ) -> list[Clients.client]:
         """Returns a list of user objects"""
         # Variables
@@ -264,7 +264,7 @@ class Main:
             self.log.info(
                 f"All possible users have been created. A total of {len(user_list)}"
             )
-            self.log.info(f"Creating canvas object...")
+            self.log.info("Creating canvas object...")
         else:
             self.log.warning("USER: no users were found. Exiting..")
             exit()
@@ -280,11 +280,9 @@ class Main:
 
         except Exception as e:
             # If error is reported in connecting to canvas
-            self.log.exception(
-                Exception(
-                    f"CONNECTOR: Error connecting to canvas: {e}"
+            self.log.critical(
+                    "CONNECTOR: Error connecting to canvas: {}".format(e)
                 )
-            )
             exit()
 
         self.log.info("Successfully created canvas connection. Commencing upload.")
