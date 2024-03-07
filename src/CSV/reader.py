@@ -4,11 +4,6 @@
     Purpose:
         Class for reading the CSV file
 '''
-
-# TODO: The reader objects are not single purpose.
-#   These objects should be renamed to parser.
-#   So as to parse sourceFile to objects
-
 import csv
 # External imports
 from abc import ABC, abstractmethod
@@ -21,7 +16,7 @@ from src.File import sourceFile
 class Reader(ABC):
     '''Reader for csv files'''
     @abstractmethod
-    def __init__(self, source: sourceFile) -> None:
+    def __init__(self, source_file: sourceFile) -> None:
         '''Initialise Reader'''
 
     @abstractmethod
@@ -32,7 +27,7 @@ class Reader(ABC):
 class CSVReader(Reader):
     ''' read CSV files '''
 
-    def __init__(self, sourceFile: sourceFile) -> None:
+    def __init__(self, source_file: sourceFile) -> None:
         ''' Initialise a reader with a source '''
 
         # Verify that sourcefile is CSV filetype
@@ -40,7 +35,7 @@ class CSVReader(Reader):
         #     raise TypeError(f"Incorrect source file type: {sourceFile}")
 
         # Assign source file
-        self.source_file = sourceFile.open_file
+        self.source_file = source_file.open_file
 
     def get_clients(self) -> list:
         ''' Read clients from csv and return details'''

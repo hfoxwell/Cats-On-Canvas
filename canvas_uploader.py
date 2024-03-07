@@ -7,20 +7,13 @@
 """
 
 # External imports
-import os, sys
-
+import os
+import sys
 
 # Internal imports
-from src.Image import imageFactory
-from src.Logger import configure_logging
-from src.CSV import reader
-
-import src.Clients as Clients
-import src.File as SourceFile
-import src.Canvas as Canvas
-import src.custom_errors as custom_errors
-import src.Config as Config
-import src.Settings as Settings
+from src import CSV, Canvas, Clients, Config
+from src import File as SourceFile
+from src import Image, Logger, Settings, custom_errors
 
 
 def check_python_version() -> None:
@@ -57,12 +50,13 @@ class Main:
     """
     This is the main entry for the program
     """
+
     # Constants
-    SETTINGS_DIRECTORY = './Settings/'
+    SETTINGS_DIRECTORY = "./Settings/"
 
     # Class variables
     settings: Config.Config
-    
+
     def __init__(self) -> None:
         self.settings_loader = Settings.SettingsLoader()
         self.settings_parser = Config.YAML_Parser()
@@ -74,7 +68,7 @@ class Main:
         """
 
         # log start of function
-        self.log.info("FILE: Verifying directories {}".format(directory_list))
+        self.log.debug("FILE: Verifying directories {}".format(directory_list))
 
         # Verify the folders
         for directory in directory_list:
@@ -90,7 +84,7 @@ class Main:
                     f"Directory missing: {directory}"
                 )
             else:
-                self.log.info(f'File: "{directory}" found.')
+                self.log.info('File: "%s" found.', directory)
 
             # If folder empty, then raise value error
             if not os.listdir(directory):
@@ -99,23 +93,23 @@ class Main:
                     f"Directory is empty: {directory}"
                 )
 
-    def Create_student_list(
+    def create_student_list(
         self, client_list: list[dict[str, str]], img_location: str
     ) -> list[Clients.client]:
         """Returns a list of user objects"""
         # Variables
-        userList: list[Clients.client] = []
+        user_list: list[Clients.client] = []
 
         # Iterate through list from Csv
         for student in client_list:
 
             # Write to logfile the current student being processed
-            self.log.info(f"Current Student: {student}")
+            self.log.info("Current Student: %s", student)
 
             # confirm user's image exists in directory
             try:
                 # Create an image factory object and validate image creation.
-                imgFactory: imageFactory = imageFactory(
+                image_factory: Image.imageFactory = Image.imageFactory(
                     img_location, student["image_filename"]
                 )
             except OSError as e:
@@ -124,62 +118,62 @@ class Main:
                     FileNotFoundError(f'FILE: {e} {student["image_filename"]}')
                 )
                 self.log.info(
-                    f'USER: user, {student["client_id"]} Skipped as no image could be found'
+                    "USER: user, %s Skipped as no image could be found",
+                    student["client_id"],
                 )
                 continue
 
             # Create user object
             try:
                 user: Clients.client = Clients.client(
-                    student["client_id"], imgFactory.open_image()
+                    student["client_id"], image_factory.open_image()
                 )
             except Exception as user_error:
                 # Catch error creating user
                 # Write this to log
-                self.log.exception(
-                    f'USER: Could not create user {student["client_id"]} : {user_error}'
+                self.log.error(
+                    "USER: Could not create user %s : %s",
+                    student["client_id"],
+                    user_error,
                 )
                 continue
 
             ###################
             # Print out created user details
             ###################
-            self.log.info(
-                f"Creating User: {user.client_id}\t\n" +
-                f"With Image: {user.image.image_name}",
-            )
+            self.log.info(f"Creating:\tUser - {user.client_id:^20} Image: {user.image.image_name:>20}")
 
             # Add user object to list of users
-            userList.append(user)
+            user_list.append(user)
 
         ###############################
         # Console & log Number of users
         ###############################
-        self.log.info(f"Total of {len(userList)} users created")
+        self.log.info("Total of %i users created", len(user_list))
 
         # Return list of user objects
-        return userList
+        return user_list
 
     def process_user(self, user: Clients.client, connector: Canvas.POST_data_canvas):
         """upload a user to canvas"""
         # Step 0: Get canvas user ID via SIS ID
         if not connector.get_canvas_id(user):
             # If connector cannot get user id skip user
-            self.log.info(f"CANVAS: Skipping user: {user.client_id}")
+            self.log.info("CANVAS: Skipping user: %s", user.client_id)
             return
 
         # Step 1: Start upload file to user's file storage
         if not connector.upload_user_data(user):
             # if no upload happened log and next student
             self.log.info(
-                f"CANVAS: Skipping user: {user.client_id} File could not be uploaded"
+                "CANVAS: Skipping user: %s File could not be uploaded", user.client_id
             )
             return
 
         # Step 2: Make API call to set avatar image
         if not connector.set_image_as_avatar(user):
             self.log.warning(
-                f"CANVAS: Error changing profile picture for: {user.client_id}"
+                "CANVAS: Error changing profile picture for: %s", user.client_id
             )
             return
 
@@ -188,19 +182,23 @@ class Main:
         """Main function for controlling application flow"""
         # Variables
 
-        list_of_clients: list[Clients.client] = []
+        list_of_clients: list[dict[str, str]] = []
 
         #######################################
         # Initalise settings for the program
         #######################################
         # Get the settings config from the file
-        settings_file_path = self.settings_loader.find_settings_file(self.SETTINGS_DIRECTORY)
-        self.settings = self.settings_loader.load_settings(settings_file_path, self.settings_parser)
+        settings_file_path = self.settings_loader.find_settings_file(
+            self.SETTINGS_DIRECTORY
+        )
+        self.settings = self.settings_loader.load_settings(
+            settings_file_path, self.settings_parser
+        )
 
         #######################################
         # Initalise the log
         #######################################
-        self.log = configure_logging("Settings/log_config.json", __name__)
+        self.log = Logger.configure_logging("Settings/log_config.json", __name__)
 
         #########################################
         # Verify that directories exist
@@ -216,23 +214,23 @@ class Main:
 
         except custom_errors.DirectoriesCheckError:
             message: str = (
-                f"FILE: Unable to continue without critical directories. Exiting program"
+                "FILE: Unable to continue without critical directories. Exiting program"
             )
             # Log the error
             self.log.exception(message)
 
             # exiting program
-            exit()
+            sys.exit()
 
         except ValueError:
             message: str = (
-                f"FILE: Critical directories do not contain any files. Exiting program"
+                "FILE: Critical directories do not contain any files. Exiting program"
             )
             # Log error
             self.log.exception(message)
 
             # Exiting program
-            exit()
+            sys.exit()
 
         self.log.info("File: Checks Complete. Starting Client Generation")
 
@@ -241,14 +239,12 @@ class Main:
         ######################################
         source: SourceFile.sourceFile = SourceFile.csv_Source(
             f"{self.settings.csv_directory}{self.settings.csv_filename}"
-            )
-        
+        )
+
         ######################################
         # Create reader
         ######################################
-        file_reader: reader.Reader = reader.CSVReader(
-            sourceFile=source
-        )
+        file_reader: CSV.CSVReader = CSV.CSVReader(source_file=source)
         list_of_clients = file_reader.get_clients()
 
         ######################################
@@ -256,13 +252,13 @@ class Main:
         #####################################
         # For each dictionary in the list
         # log details and create a user object
-        user_list = self.Create_student_list(list_of_clients, self.settings.images_path)
+        user_list = self.create_student_list(list_of_clients, self.settings.images_path)
 
         # Now that users have been created upload them to canvas
         # if no users have been created. Then EXIT the program
         if len(user_list) > 0:
             self.log.info(
-                f"All possible users have been created. A total of {len(user_list)}"
+                "All possible users have been created. A total of %i", len(user_list)
             )
             self.log.info("Creating canvas object...")
         else:
@@ -280,9 +276,7 @@ class Main:
 
         except Exception as e:
             # If error is reported in connecting to canvas
-            self.log.critical(
-                    "CONNECTOR: Error connecting to canvas: {}".format(e)
-                )
+            self.log.critical("CONNECTOR: Error connecting to canvas: %s", e)
             exit()
 
         self.log.info("Successfully created canvas connection. Commencing upload.")
@@ -290,25 +284,23 @@ class Main:
         ########################################
         # For each user Start upload process
         ########################################
-        count_of_uploaded_users: int = 1
-        for user in user_list:
-            """For each student in user list upload data to canvas"""
+        for count, user in enumerate(user_list, 1):
+            # For each student in user list upload data to canvas
+            # Make sure enumerate starts at 1
 
             # Call function to process a user
             self.process_user(user, connector)
 
             # Confirm in the console that user has been uploaded...
             # Increment after upload is completed
-            self.log.info(f"Finished {count_of_uploaded_users} of {len(user_list)} users")
-            count_of_uploaded_users += 1
-
+            self.log.info(
+                "Finished %i of %i users", count, len(user_list)
+            )
 
 if __name__ == "__main__":
-    """
-    Sets up the program and runs the canvas uploader
-    Checks the program state first, then sets up the
-    main object to be used.
-    """
+    # Sets up the program and runs the canvas uploader
+    # Checks the program state first, then sets up the
+    # main object to be used.
 
     # Check python state
     check_python_version()
