@@ -43,6 +43,7 @@ class POST_data_canvas(Canvas_connector):
         self.domain: str = f"https://{domain}/api/v1"
         self.header: dict = {"Authorization": f"Bearer {self.Auth_token}"}
         self.params: dict = {}
+        self.upload_params: dict = {}
 
         self.Session.headers.update()
 
@@ -108,6 +109,7 @@ class POST_data_canvas(Canvas_connector):
     def upload_user_data(self, user: client) -> bool:
         """Upload image to users files"""
         # Variables
+        self.upload_params = {}
         url: str = self.domain + "/users/self/files"
         inform_parameters = {
             "name": user.image.image_name,
@@ -133,12 +135,17 @@ class POST_data_canvas(Canvas_connector):
         # Set the params to the params based on the response from canvas
         # These must be identical to the params received from canvas.
         # Else this will fail
-        self.params = json_res["upload_params"]
-
+        try:
+            self.upload_params = json_res["upload_params"]
+        except KeyError as e:
+            self.log.error(
+                "Upload Parameters could not be set: %s. The following response was returned %s".format(e, response.text)
+            )
+            return False
         # Send the file to canvas
         # Get upload confirmation
         upload_file_response = requests.post(
-            json_res["upload_url"], data=self.params, files=files, allow_redirects=False
+            json_res["upload_url"], data=self.upload_params, files=files, allow_redirects=False
         )
 
         status_code: int = upload_file_response.status_code
@@ -171,19 +178,26 @@ class POST_data_canvas(Canvas_connector):
     def set_image_as_avatar(self, user: client) -> bool:
         """Sets and image to be a users PFP"""
 
+        # Check that upload params contains values
+        if self.upload_params == {}:
+            self.log.error(
+                "Upload params is empty, cannot set image avatar."
+            )
+            return False
+
         # Log that Canvas avatar is being updated
         self.log.info(
             f"Setting canvas Avatar for: {user.client_id} To: {user.image.image_name}"
         )
 
         # Set parameters as the user_id
-        self.params = {"as_user_id": f"{user.client_id}"}
+        self.upload_params = {"as_user_id": f"{user.client_id}"}
 
         # Get-Request the user avatars images, to get image id
         avatar_options = requests.get(
             f"{self.domain}/users/{user.client_id}/avatars",
             headers=self.header,
-            params=self.params,
+            params=self.upload_params,
         )
 
         # As there are multiple avatars that come stock with canvas
@@ -196,7 +210,7 @@ class POST_data_canvas(Canvas_connector):
             # The image token is unique to each request. So cannot be
             # relied on between sessions.
             if avatar_opts.get("display_name") == user.image.image_name:
-                self.params["user[avatar][token]"] = avatar_opts.get("token")
+                self.upload_params["user[avatar][token]"] = avatar_opts.get("token")
 
             # Create put request to tell canvas to update pfp
             # This is done as a put to prevent POST from regenerating
