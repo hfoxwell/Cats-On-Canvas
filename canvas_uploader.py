@@ -60,6 +60,7 @@ class Main:
     def __init__(self) -> None:
         self.settings_loader = Settings.SettingsLoader()
         self.settings_parser = Config.YAML_Parser()
+        self.skipped_users: list[Clients.client] = []
 
     def check_directories(self, *directory_list) -> None:
         """
@@ -160,6 +161,7 @@ class Main:
         if not connector.get_canvas_id(user):
             # If connector cannot get user id skip user
             self.log.info("CANVAS: Skipping user: %s", user.client_id)
+            self.skipped_users.append(user)
             return
 
         # Step 1: Start upload file to user's file storage
@@ -168,6 +170,7 @@ class Main:
             self.log.info(
                 "CANVAS: Skipping user: %s File could not be uploaded", user.client_id
             )
+            self.skipped_users.append(user)
             return
 
         # Step 2: Make API call to set avatar image
@@ -175,6 +178,7 @@ class Main:
             self.log.warning(
                 "CANVAS: Error changing profile picture for: %s", user.client_id
             )
+            self.skipped_users.append(user)
             return
 
     # Main function
@@ -295,6 +299,14 @@ class Main:
             # Increment after upload is completed
             self.log.info(
                 "Finished %i of %i users", count, len(user_list)
+            )
+        
+        # Log the skipped users    
+        self.log.info("The following users were skipped:")
+        for count, user in enumerate(self.skipped_users):
+            # Log the skipped users
+            self.log.error(
+                "%i : %s".format(count, user.client_id)
             )
 
 if __name__ == "__main__":
