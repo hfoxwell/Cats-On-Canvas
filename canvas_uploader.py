@@ -62,6 +62,12 @@ class Main:
         self.settings_loader = Settings.SettingsLoader()
         self.settings_parser = Config.YAML_Parser()
         self.skipped_users: list[Clients.client] = []
+        
+        #######################################
+        # Initalise the log
+        #######################################
+        self.log = Logger.configure_logging("Settings/log_config.json", __name__)
+        
 
     def check_directories(self, *directory_list) -> None:
         """
@@ -205,11 +211,6 @@ class Main:
         self.settings = self.settings_loader.load_settings(
             settings_file_path, self.settings_parser
         )
-
-        #######################################
-        # Initalise the log
-        #######################################
-        self.log = Logger.configure_logging("Settings/log_config.json", __name__)
 
         #########################################
         # Verify that directories exist

@@ -16,6 +16,14 @@
             "formatter" : "simple",
             "stream" : "ext://sys.stdout"
         },
+        "queue_handler" : {
+            "class" : "logging.handlers.QueueHandler",
+            "handlers" : [
+                "stdout",
+                "file"
+            ],
+            "respect_handler_level" : true
+        },
         "file" : {
             "class" : "logging.handlers.RotatingFileHandler",
             "level": "INFO",
@@ -24,9 +32,8 @@
             "maxBytes" : 10000000,
             "backupCount" : 3
         }
-    }
-    ,
+    },
     "loggers" : {
-        "root":{"level" : "DEBUG", "handlers": ["stdout", "file"]}
+        "root":{"level" : "INFO", "handlers": ["queue_handler"]}
     }
 }

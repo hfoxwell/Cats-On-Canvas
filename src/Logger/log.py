@@ -11,6 +11,7 @@ import json
 
 import logging
 import logging.config
+import atexit
 
 def open_log_config(config_path: str):
     '''Opens the logging config file'''
@@ -22,7 +23,22 @@ def open_log_config(config_path: str):
 def configure_logging(log_config_path: str, name: str) -> logging.Logger:
     '''Creates logger and configures the logger with dict_config'''
     logger = logging.getLogger(name)
-    log_config = open_log_config(log_config_path)
+    
+    # Load logging configuration from file
+    logging.config.dictConfig(
+        open_log_config(log_config_path)
+    )
+    
+    # Retrieve the queue handler
+    queue_handler = None
+    for handler in logger.handlers:
+        if isinstance(handler, logging.handlers.QueueHandler):
+            queue_handler = handler
+            break
 
-    logging.config.dictConfig(config=log_config)
+    # Start the queue handler listener if found
+    if queue_handler:
+        queue_handler.start()
+        atexit.register(queue_handler.stop)
+
     return logger
