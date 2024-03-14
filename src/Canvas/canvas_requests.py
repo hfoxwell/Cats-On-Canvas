@@ -69,19 +69,13 @@ class POST_data_canvas(Canvas_connector):
         res: requests.Response = requests.get(
             f"{self.domain}/accounts", self.params, headers=self.header
         )
+        res.raise_for_status()
 
         if res.status_code == desired_result:
             # If result 200 then return true
             self.log.info("CANVAS: Connection Successfully Tested")
             return True
-        else:
-            # If other result received return false
-            self.log.exception(
-                ConnectionRefusedError(
-                    f"Canvas Refused the connection: {res.status_code}"
-                )
-            )
-            raise ConnectionRefusedError("Canvas Refused the connection")
+        
 
     def get_canvas_id(self, user: client) -> bool:
         """Gets a user ID from Canvas"""
@@ -104,7 +98,7 @@ class POST_data_canvas(Canvas_connector):
         else:
             # If not found, return an error to the log with the SIS id
             self.log.exception(f"USER: {user.client_id} cannot be found in canvas")
-            return False
+            user_Details.raise_for_status()
 
     def upload_user_data(self, user: client) -> bool:
         """Upload image to users files"""
@@ -123,6 +117,8 @@ class POST_data_canvas(Canvas_connector):
         response: requests.Response = requests.post(
             url, headers=self.header, data=inform_parameters
         )
+
+        response.raise_for_status()
 
         # json_res = json.loads(response.text)
         # # Get response and send data
@@ -199,6 +195,8 @@ class POST_data_canvas(Canvas_connector):
             headers=self.header,
             params=self.upload_params,
         )
+        
+        avatar_options.raise_for_status()
 
         # As there are multiple avatars that come stock with canvas
         # the program needs to iterate through the avatars to find
@@ -218,8 +216,10 @@ class POST_data_canvas(Canvas_connector):
             set_avatar_user = requests.put(
                 f"{self.domain}/users/{user.client_id}",
                 headers=self.header,
-                params=self.params,
+                params=self.upload_params,
             )
+            
+            set_avatar_user.raise_for_status()
 
         # If the canvas response is 200, then the update has been successful
         if set_avatar_user.status_code == 200:

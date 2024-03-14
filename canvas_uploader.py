@@ -157,29 +157,21 @@ class Main:
 
     def process_user(self, user: Clients.client, connector: Canvas.POST_data_canvas):
         """upload a user to canvas"""
-        # Step 0: Get canvas user ID via SIS ID
-        if not connector.get_canvas_id(user):
-            # If connector cannot get user id skip user
-            self.log.info("CANVAS: Skipping user: %s", user.client_id)
-            self.skipped_users.append(user)
-            return
+        try:
+            # Step 0: Get canvas user ID via SIS ID
+            connector.get_canvas_id(user)
 
-        # Step 1: Start upload file to user's file storage
-        if not connector.upload_user_data(user):
+            # Step 1: Start upload file to user's file storage
+            connector.upload_user_data(user)
             # if no upload happened log and next student
-            self.log.info(
-                "CANVAS: Skipping user: %s File could not be uploaded", user.client_id
-            )
-            self.skipped_users.append(user)
-            return
 
-        # Step 2: Make API call to set avatar image
-        if not connector.set_image_as_avatar(user):
-            self.log.warning(
-                "CANVAS: Error changing profile picture for: %s", user.client_id
+            # Step 2: Make API call to set avatar image
+            connector.set_image_as_avatar(user)
+        except Exception as e:
+            self.log.error(
+                "Could not process user: %s - %s".format(user.client_id, e.__repr__)
             )
             self.skipped_users.append(user)
-            return
 
     # Main function
     def main(self):
