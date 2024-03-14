@@ -9,6 +9,7 @@
 # External imports
 import os
 import sys
+from concurrent.futures import ThreadPoolExecutor
 
 # Internal imports
 from src import CSV, Canvas, Clients, Config
@@ -61,6 +62,7 @@ class Main:
         self.settings_loader = Settings.SettingsLoader()
         self.settings_parser = Config.YAML_Parser()
         self.skipped_users: list[Clients.client] = []
+        self.thread_pool = threading.Thread
 
     def check_directories(self, *directory_list) -> None:
         """
@@ -280,18 +282,16 @@ class Main:
         ########################################
         # For each user Start upload process
         ########################################
-        for count, user in enumerate(user_list, 1):
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            
             # For each student in user list upload data to canvas
             # Make sure enumerate starts at 1
 
             # Call function to process a user
-            self.process_user(user, connector)
+            future_tasks = [executor.submit(self.process_user, user, connector) for user in user_list]
 
-            # Confirm in the console that user has been uploaded...
-            # Increment after upload is completed
-            self.log.info(
-                "Finished %i of %i users", count, len(user_list)
-            )
+            for future in future_tasks:
+                future.result()
         
         # Log the skipped users    
         self.log.info("The following users were skipped:")
