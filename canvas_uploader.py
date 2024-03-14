@@ -62,7 +62,6 @@ class Main:
         self.settings_loader = Settings.SettingsLoader()
         self.settings_parser = Config.YAML_Parser()
         self.skipped_users: list[Clients.client] = []
-        self.thread_pool = threading.Thread
 
     def check_directories(self, *directory_list) -> None:
         """
