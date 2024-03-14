@@ -156,8 +156,22 @@ class Main:
         # Return list of user objects
         return user_list
 
-    def process_user(self, user: Clients.client, connector: Canvas.POST_data_canvas):
+    def process_user(self, user: Clients.client):
         """upload a user to canvas"""
+        #########################################
+        # Create and initialise canvas connector
+        #########################################
+        try:
+            #  Attempt to connect to canvas
+            connector = Canvas.POST_data_canvas(
+                self.settings.access_token, self.settings.domain
+            )
+
+        except Exception as e:
+            # If error is reported in connecting to canvas
+            self.log.critical("CONNECTOR: Error connecting to canvas: %s", e)
+            return
+        
         try:
             # Step 0: Get canvas user ID via SIS ID
             connector.get_canvas_id(user)
@@ -170,7 +184,7 @@ class Main:
             connector.set_image_as_avatar(user)
         except Exception as e:
             self.log.error(
-                "Could not process user: %s - %s".format(user.client_id, e.__repr__)
+                "Could not process user: %s - %s", user.client_id, e.__repr__
             )
             self.skipped_users.append(user)
 
@@ -262,22 +276,6 @@ class Main:
             self.log.warning("USER: no users were found. Exiting..")
             exit()
 
-        #########################################
-        # Create and initialise canvas connector
-        #########################################
-        try:
-            #  Attempt to connect to canvas
-            connector = Canvas.POST_data_canvas(
-                self.settings.access_token, self.settings.domain
-            )
-
-        except Exception as e:
-            # If error is reported in connecting to canvas
-            self.log.critical("CONNECTOR: Error connecting to canvas: %s", e)
-            exit()
-
-        self.log.info("Successfully created canvas connection. Commencing upload.")
-
         ########################################
         # For each user Start upload process
         ########################################
@@ -287,7 +285,7 @@ class Main:
             # Make sure enumerate starts at 1
 
             # Call function to process a user
-            future_tasks = [executor.submit(self.process_user, user, connector) for user in user_list]
+            future_tasks = [executor.submit(self.process_user, user) for user in user_list]
 
             for future in future_tasks:
                 future.result()
