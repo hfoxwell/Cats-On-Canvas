@@ -30,7 +30,6 @@ class Config():
     domain: str
 
     # File settings
-    log_filename: str
     csv_filename: str
 
 
@@ -75,7 +74,6 @@ class YAML_Parser():
             csv_directory=self.Settings_contents['Directories']['csv_directory'],
             csv_filename=self.Settings_contents['File_names']['csv_filename'],
             images_path=self.Settings_contents['Directories']['images_directory'],
-            log_filename=self.Settings_contents['File_names']['log_filename']
         )
 
         return conf

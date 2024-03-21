@@ -39,7 +39,7 @@ class Canvas_connector(ABC):
 class POST_data_canvas(Canvas_connector):
     """Posts data to canvas"""
 
-    def __init__(self, Token: str, domain: str, timeout: int) -> None:
+    def __init__(self, Token: str, domain: str, timeout: int, dry_run = False) -> None:
         """For passing information to canvas"""
         self.auth_token: str = Token
         self.domain: str = f"https://{domain}/api/v1"
@@ -48,17 +48,24 @@ class POST_data_canvas(Canvas_connector):
         self.upload_params: dict = {}
         self.user: Client = None
         self.timeout = timeout
+        self.dry_run = dry_run
 
         # Logger instance
         self.log: logging.Logger = logging.getLogger(__name__)
 
         # Log initialised values
         self.log.debug(
-            "CANVAS: initialised values:\n" +
-            f"Auth Token:\t {self.auth_token}\n" +
-            f"Domain:\t {self.domain}\n" +
-            f"Header:\t {self.header}\n" +
-            f"Params:\t {self.params}\n"
+            """
+            CANVAS: initialised values:
+            Auth Token:\t %s
+            Domain:\t %s
+            Header:\t %s
+            Params:\t %s
+            """,
+            self.auth_token,
+            self.domain,
+            self.header,
+            self.params,
         )
         # Call Canvas Test function
         self._test_canvas_connection()
@@ -108,9 +115,18 @@ class POST_data_canvas(Canvas_connector):
             self.log.exception(f"USER: {self.user.client_id} cannot be found in canvas")
             user_Details.raise_for_status()
 
-    def upload_user_data(self) -> bool:
+    def upload_user_data(self):
         """Upload image to users files"""
         self.log.info('Starting upload of profile picture for: %s', self.user.client_id)
+        
+        # Account for dry run
+        if self.dry_run:
+            # Notify users that a dry run upload is occurring
+            self.log.info(
+                "######## DRY RUN UPLOAD ########"
+            )
+            # Exit function early
+            return 
         
         # Variables
         self.upload_params = {}
@@ -197,8 +213,22 @@ class POST_data_canvas(Canvas_connector):
         self.log.info('Successfully uploaded file.')
         return True
 
-    def set_image_as_avatar(self) -> bool:
+    def set_image_as_avatar(self):
         """Sets and image to be a users PFP"""
+        # Log that Canvas avatar is being updated
+        self.log.info(
+            "Setting canvas Avatar for: %s to: %s",
+            self.user.client_id,
+            self.user.image.image_name
+        )
+        
+        # Notify user of dry run
+        if self.dry_run:
+            self.log.info(
+                "######## DRY RUN SET OF AVATAR ########"
+            )
+            # Exit function early
+            return
 
         # Check that upload params contains values
         if self.upload_params == {}:
@@ -207,12 +237,6 @@ class POST_data_canvas(Canvas_connector):
             )
             return False
 
-        # Log that Canvas avatar is being updated
-        self.log.info(
-            "Setting canvas Avatar for: %s to: %s",
-            self.user.client_id,
-            self.user.image.image_name
-        )
 
         # Set parameters as the user_id
         self.upload_params = {"as_user_id": f"{self.user.client_id}"}

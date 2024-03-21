@@ -9,7 +9,7 @@
 # External imports
 import os
 import sys
-import timeit
+import argparse
 from datetime import datetime
 from pathlib import Path
 from queue import Queue
@@ -55,16 +55,19 @@ class Main:
     This is the main entry for the program
     """
 
-    # Constants
-    SETTINGS_DIRECTORY = "./Settings/"
-    PRODUCERS = 5
-    CONSUMERS = 5
-    REQUEST_TIMEOUT = 3
-
     # Class variables
     settings: Config.Config
 
-    def __init__(self) -> None:
+    def __init__(self, args: argparse.Namespace) -> None:
+        # Constants
+        self.SETTINGS_DIRECTORY = "./Settings/"
+        self.LOGGING_CONFIG = "log_config.json"
+        self.DRY_RUN = args.dry_run
+        self.PRODUCERS = args.producers
+        self.CONSUMERS = args.consumers
+        self.REQUEST_TIMEOUT = args.timeout
+
+        # Variables
         self.settings_loader = Settings.SettingsLoader()
         self.settings_parser = Config.YAML_Parser()
         self.skipped_users: list[Clients.Client] = []
@@ -112,11 +115,35 @@ class Main:
     def main(self):
         """Main function for controlling application flow"""
         # Variables
-
         list_of_clients: list[dict[str, str]] = []
         client_identifier_buffer: Queue[Clients.ClientIdentifier] = Queue()
         client_buffer: Queue[Clients.Client] = Queue()
 
+        #######################################
+        ## Debug log current config
+        #######################################
+        self.log.debug(
+            '''
+            Configuration:
+            \tDry_run: %s| 
+            \tSettings_dir: %s|
+            \tLogging_config: %s|
+            \tProducer_count: %s|
+            \tConsumer_count: %s|
+            \tRequest_timeout: %s|
+            ''',
+            self.DRY_RUN,
+            self.SETTINGS_DIRECTORY,
+            self.LOGGING_CONFIG,
+            self.PRODUCERS,
+            self.CONSUMERS,
+            self.REQUEST_TIMEOUT
+        )
+        if self.DRY_RUN:
+            self.log.info(
+                '######### DRY RUN #########'
+            )
+        
         #######################################
         # Initalise settings for the program
         #######################################
@@ -126,6 +153,21 @@ class Main:
         )
         self.settings: Config.Config = self.settings_loader.load_settings(
             settings_file_path, self.settings_parser
+        )
+        
+        #########################################
+        # Debug settings file configuration
+        #########################################
+        self.log.debug(
+            '''
+            Settings file confgiuration:
+            \tWorking_path: %s|
+            \tCSV_directory: %s|
+            \tImages_directory: %s|
+            ''',
+            self.settings.working_path,
+            self.settings.csv_directory,
+            self.settings.images_path
         )
 
         #########################################
@@ -220,9 +262,10 @@ class Main:
             Workers.Consumer(
                 user_queue=client_buffer,
                 canvas_connector=Canvas.POST_data_canvas(
-                    self.settings.access_token, 
+                    self.settings.access_token,
                     self.settings.domain,
-                    timeout=self.REQUEST_TIMEOUT
+                    timeout=self.REQUEST_TIMEOUT,
+                    dry_run=self.DRY_RUN,
                 ),
             )
             for _ in range(self.CONSUMERS)
@@ -241,7 +284,19 @@ class Main:
 
         client_identifier_buffer.join()
         client_buffer.join()
-        self.log.info('Finished')
+        self.log.info("Finished")
+
+
+def arg_parse():
+    """Parse command line arguments"""
+    argument_parser = argparse.ArgumentParser()
+    argument_parser.add_argument("-d", "--dry-run", type=bool, default=False)
+    argument_parser.add_argument("-p", "--producers", type=int, default=2)
+    argument_parser.add_argument("-c", "--consumers", type=int, default=5)
+    argument_parser.add_argument("-t", "--timeout", type=int, default=5)
+
+    return argument_parser.parse_args()
+
 
 if __name__ == "__main__":
     # Sets up the program and runs the canvas uploader
@@ -252,5 +307,5 @@ if __name__ == "__main__":
     check_python_version()
 
     # If module is run by itself then run main
-    main_object: object = Main()  # Create main object
+    main_object: object = Main(arg_parse())  # Create main object
     main_object.main()  # Run main from object
