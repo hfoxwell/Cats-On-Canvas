@@ -1,19 +1,19 @@
-'''
+"""
     Author: H Foxwell
     Date:   26/05/2022
     Purpose:
         Class representing an image
-'''
+    Updated: (hayden foxwell - 21/03/24)
+"""
+
 # External imports
-import os
 from dataclasses import dataclass, field
-
-
-# Internal Imports
+from pathlib import Path
 
 # File Class
 @dataclass
-class image:
+class Image:
+    '''Represents a profile picture'''
     image_file: bytes = field(compare=False)
     image_name: str = field(compare=True)
     image_path: str = field(compare=False)
@@ -22,34 +22,29 @@ class image:
     image_canvas_id: str = field(init=False)
 
     def __post_init__(self):
-        imgSize: int = (self.image_file.__sizeof__())
-        print(f'Bytes Size: {imgSize}')
-        # imgSize = os.path.getsize(f'{self.image_path}{self.image_name}')
-        # print(imgSize)
-        self.image_size = imgSize
+        self.image_size = self.image_file.__sizeof__()
 
 
 # File module
-class imageFactory():
-    ''' Handles all images for the app '''
+class ImageFactory:
+    """Handles all images for the app"""
 
-    def __init__(self, img_path: str, img_name: str) -> None:
-
-        # Check that specified image exists
-        if not(self.image_exists(img_path, img_name)):
-            raise OSError("File not Found")
-
-        self.image_path: str = img_path
-        self.image_name: str = img_name
-
-    def open_image(self) -> image:
-        '''Open an image file'''
-        # Open file as byte file
-        img_bytes = open(f'{self.image_path}{self.image_name}', 'rb').read()
-
+    def open_image(self, image_path: Path) -> Image:
+        """Open an image file"""
+        # Variables
+        img_bytes: bytes
+        
+        try:
+            # Open file as byte file
+            with open(image_path, "rb") as img_file:
+                img_bytes = img_file.read()
+        except FileNotFoundError as FNFE:
+            raise FileNotFoundError from FNFE
+        
         # create image file object and return
-        return image(img_bytes, self.image_name, self.image_path, "")
-
-    def image_exists(self, image_path: str, image_name: str) -> bool:
-        ''' Check that an image exists'''
-        return os.path.exists(f'{image_path}{image_name}')
+        return Image(
+            image_file = img_bytes,
+            image_name = image_path.name,
+            image_path = str(image_path),
+            file_type = image_path.suffix
+        )

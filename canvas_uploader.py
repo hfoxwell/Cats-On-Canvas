@@ -9,12 +9,15 @@
 # External imports
 import os
 import sys
-from concurrent.futures import ThreadPoolExecutor
+import timeit
+from datetime import datetime
+from pathlib import Path
+from queue import Queue
 
 # Internal imports
 from src import CSV, Canvas, Clients, Config
 from src import File as SourceFile
-from src import Image, Logger, Settings, custom_errors
+from src import Image, Logger, Settings, Workers, custom_errors
 
 
 def check_python_version() -> None:
@@ -54,6 +57,9 @@ class Main:
 
     # Constants
     SETTINGS_DIRECTORY = "./Settings/"
+    PRODUCERS = 5
+    CONSUMERS = 5
+    REQUEST_TIMEOUT = 3
 
     # Class variables
     settings: Config.Config
@@ -61,13 +67,14 @@ class Main:
     def __init__(self) -> None:
         self.settings_loader = Settings.SettingsLoader()
         self.settings_parser = Config.YAML_Parser()
-        self.skipped_users: list[Clients.client] = []
-        
+        self.skipped_users: list[Clients.Client] = []
+        self.producers = []
+        self.consumers = []
+
         #######################################
         # Initalise the log
         #######################################
         self.log = Logger.configure_logging("Settings/log_config.json", __name__)
-        
 
     def check_directories(self, *directory_list) -> None:
         """
@@ -101,105 +108,14 @@ class Main:
                     f"Directory is empty: {directory}"
                 )
 
-    def create_student_list(
-        self, client_list: list[dict[str, str]], img_location: str
-    ) -> list[Clients.client]:
-        """Returns a list of user objects"""
-        # Variables
-        user_list: list[Clients.client] = []
-
-        # Iterate through list from Csv
-        for student in client_list:
-
-            # Write to logfile the current student being processed
-            self.log.info("Current Student: %s", student)
-
-            # confirm user's image exists in directory
-            try:
-                # Create an image factory object and validate image creation.
-                image_factory: Image.imageFactory = Image.imageFactory(
-                    img_location, student["image_filename"]
-                )
-            except OSError as e:
-                # if error raised by factory, image does not exits.
-                self.log.exception(
-                    FileNotFoundError(f'FILE: {e} {student["image_filename"]}')
-                )
-                self.log.info(
-                    "USER: user, %s Skipped as no image could be found",
-                    student["client_id"],
-                )
-                continue
-
-            # Create user object
-            try:
-                user: Clients.client = Clients.client(
-                    student["client_id"], image_factory.open_image()
-                )
-            except Exception as user_error:
-                # Catch error creating user
-                # Write this to log
-                self.log.error(
-                    "USER: Could not create user %s : %s",
-                    student["client_id"],
-                    user_error,
-                )
-                continue
-
-            ###################
-            # Print out created user details
-            ###################
-            self.log.info(f"Creating:\tUser - {user.client_id:^20} Image: {user.image.image_name:>20}")
-
-            # Add user object to list of users
-            user_list.append(user)
-
-        ###############################
-        # Console & log Number of users
-        ###############################
-        self.log.info("Total of %i users created", len(user_list))
-
-        # Return list of user objects
-        return user_list
-
-    def process_user(self, user: Clients.client):
-        """upload a user to canvas"""
-        #########################################
-        # Create and initialise canvas connector
-        #########################################
-        try:
-            #  Attempt to connect to canvas
-            connector = Canvas.POST_data_canvas(
-                self.settings.access_token, self.settings.domain
-            )
-
-        except Exception as e:
-            # If error is reported in connecting to canvas
-            self.log.critical("CONNECTOR: Error connecting to canvas: %s", e)
-            return
-        
-        try:
-            # Step 0: Get canvas user ID via SIS ID
-            connector.get_canvas_id(user)
-
-            # Step 1: Start upload file to user's file storage
-            connector.upload_user_data(user)
-            # if no upload happened log and next student
-
-            # Step 2: Make API call to set avatar image
-            connector.set_image_as_avatar(user)
-        except Exception as e:
-            self.log.error(
-                "Could not process user: %s - %s", user.client_id, e.__repr__
-            )
-            self.skipped_users.append(user)
-
     # Main function
     def main(self):
         """Main function for controlling application flow"""
         # Variables
 
         list_of_clients: list[dict[str, str]] = []
+        client_identifier_buffer: Queue[Clients.ClientIdentifier] = Queue()
+        client_buffer: Queue[Clients.Client] = Queue()
 
         #######################################
         # Initalise settings for the program
@@ -208,7 +124,7 @@ class Main:
         settings_file_path = self.settings_loader.find_settings_file(
             self.SETTINGS_DIRECTORY
         )
-        self.settings = self.settings_loader.load_settings(
+        self.settings: Config.Config = self.settings_loader.load_settings(
             settings_file_path, self.settings_parser
         )
 
@@ -262,42 +178,70 @@ class Main:
         ######################################
         # Create users
         #####################################
-        # For each dictionary in the list
-        # log details and create a user object
-        user_list = self.create_student_list(list_of_clients, self.settings.images_path)
+        # Enqueue all client identifiers
+        for client in list_of_clients:
+            temp_client = Clients.ClientIdentifier(
+                client_id=client["client_id"],
+                profile_picture_path=Path(
+                    self.settings.images_path, client["image_filename"]
+                ),
+                file_type=client["image_filetype"],
+                date_uploaded=datetime.now(),
+            )
+            client_identifier_buffer.put(temp_client)
 
         # Now that users have been created upload them to canvas
         # if no users have been created. Then EXIT the program
-        if len(user_list) > 0:
+        if client_identifier_buffer.qsize():
             self.log.info(
-                "All possible users have been created. A total of %i", len(user_list)
+                "All possible users have been created. A total of %i",
+                client_identifier_buffer.qsize(),
             )
-            self.log.info("Creating canvas object...")
+            self.log.info("Creating workers.")
         else:
             self.log.warning("USER: no users were found. Exiting..")
-            exit()
+            sys.exit(1)
 
         ########################################
-        # For each user Start upload process
+        # Create Producers and Consumers
         ########################################
-        with ThreadPoolExecutor(max_workers=10) as executor:
-            
-            # For each student in user list upload data to canvas
-            # Make sure enumerate starts at 1
-
-            # Call function to process a user
-            future_tasks = [executor.submit(self.process_user, user) for user in user_list]
-
-            for future in future_tasks:
-                future.result()
-        
-        # Log the skipped users    
-        self.log.info("The following users were skipped:")
-        for count, user in enumerate(self.skipped_users):
-            # Log the skipped users
-            self.log.error(
-                "%i : %s".format(count, user.client_id)
+        self.log.info("Creating %i producers", self.PRODUCERS)
+        self.producers = [
+            Workers.Producer(
+                user_queue=client_buffer,
+                available_users=client_identifier_buffer,
+                image_factory=Image.ImageFactory(),
             )
+            for _ in range(self.PRODUCERS)
+        ]
+
+        self.log.info("Creating %i consumers", self.CONSUMERS)
+        self.consumers = [
+            Workers.Consumer(
+                user_queue=client_buffer,
+                canvas_connector=Canvas.POST_data_canvas(
+                    self.settings.access_token, 
+                    self.settings.domain,
+                    timeout=self.REQUEST_TIMEOUT
+                ),
+            )
+            for _ in range(self.CONSUMERS)
+        ]
+
+        #########################################
+        # Start producers and consumers
+        #########################################
+        self.log.info("Starting Production/Consumption")
+
+        for producer in self.producers:
+            producer.start()
+
+        for consumer in self.consumers:
+            consumer.start()
+
+        client_identifier_buffer.join()
+        client_buffer.join()
+        self.log.info('Finished')
 
 if __name__ == "__main__":
     # Sets up the program and runs the canvas uploader
