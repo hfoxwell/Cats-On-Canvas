@@ -56,7 +56,7 @@ class Main:
     """
 
     # Class variables
-    settings: Config.Config
+    settings: Config.Configuration
 
     def __init__(self, args: argparse.Namespace) -> None:
         # Constants
@@ -69,7 +69,7 @@ class Main:
 
         # Variables
         self.settings_loader = Settings.SettingsLoader()
-        self.settings_parser = Config.YAML_Parser()
+        self.settings_parser = Config.YAMLParser()
         self.skipped_users: list[Clients.Client] = []
         self.producers = []
         self.consumers = []
@@ -101,8 +101,8 @@ class Main:
                 raise custom_errors.DirectoriesCheckError(
                     f"Directory missing: {directory}"
                 )
-            else:
-                self.log.info('File: "%s" found.', directory)
+            
+            self.log.info('File: "%s" found.', directory)
 
             # If folder empty, then raise value error
             if not os.listdir(directory):
@@ -151,8 +151,8 @@ class Main:
         settings_file_path = self.settings_loader.find_settings_file(
             self.SETTINGS_DIRECTORY
         )
-        self.settings: Config.Config = self.settings_loader.load_settings(
-            settings_file_path, self.settings_parser
+        self.settings: Config.CSVConfig = self.settings_loader.load_settings(
+            settings_file_path, self.settings_parser, Config.CSVConfig
         )
         
         #########################################
@@ -167,7 +167,7 @@ class Main:
             ''',
             self.settings.working_path,
             self.settings.csv_directory,
-            self.settings.images_path
+            self.settings.images_directory
         )
 
         #########################################
@@ -179,7 +179,7 @@ class Main:
         # if the directories are not valid
         try:
             self.check_directories(
-                self.settings.images_path, self.settings.csv_directory
+                self.settings.images_directory, self.settings.csv_directory
             )
 
         except custom_errors.DirectoriesCheckError:
@@ -225,7 +225,7 @@ class Main:
             temp_client = Clients.ClientIdentifier(
                 client_id=client["client_id"],
                 profile_picture_path=Path(
-                    self.settings.images_path, client["image_filename"]
+                    self.settings.images_directory, client["image_filename"]
                 ),
                 file_type=client["image_filetype"],
                 date_uploaded=datetime.now(),
