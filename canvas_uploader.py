@@ -55,9 +55,6 @@ class Main:
     This is the main entry for the program
     """
 
-    # Class variables
-    settings: Config.Configuration
-
     def __init__(self, args: argparse.Namespace) -> None:
         # Constants
         self.SETTINGS_DIRECTORY = "./Settings/"
@@ -68,6 +65,7 @@ class Main:
         self.REQUEST_TIMEOUT = args.timeout
 
         # Variables
+        self.settings: Config.Configuration
         self.settings_loader = Settings.SettingsLoader()
         self.settings_parser = Config.YAMLParser()
         self.skipped_users: list[Clients.Client] = []
@@ -293,7 +291,7 @@ def arg_parse():
     argument_parser.add_argument("-d", "--dry-run", type=bool, default=False)
     argument_parser.add_argument("-p", "--producers", type=int, default=2)
     argument_parser.add_argument("-c", "--consumers", type=int, default=5)
-    argument_parser.add_argument("-t", "--timeout", type=int, default=5)
+    argument_parser.add_argument("-t", "--timeout", type=int, default=2)
 
     return argument_parser.parse_args()
 

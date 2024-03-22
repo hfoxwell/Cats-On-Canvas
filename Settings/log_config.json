@@ -16,14 +16,6 @@
             "formatter" : "simple",
             "stream" : "ext://sys.stdout"
         },
-        "queue_handler" : {
-            "class" : "logging.handlers.QueueHandler",
-            "handlers" : [
-                "stdout",
-                "file"
-            ],
-            "respect_handler_level" : true
-        },
         "file" : {
             "class" : "logging.handlers.RotatingFileHandler",
             "level": "INFO",
@@ -34,6 +26,6 @@
         }
     },
     "loggers" : {
-        "root":{"level" : "INFO", "handlers": ["queue_handler"]}
+        "root":{"level" : "INFO", "handlers": ["file", "stdout"]}
     }
 }

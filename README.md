@@ -22,7 +22,7 @@ of the avatars. The file is comprised of 3 columns; the first contains the user'
 
 The structure is as follows:
 
-| user_id | image_name | image_filetype |
+| client_id | image_filename | image_filetype |
 |---------|------------|----------------|
 | 104456  | 104456.jpg | jpeg           |
 | 65669   | 65669.jpg  | jpeg           |
@@ -82,7 +82,6 @@ Canvas_data:
 # Specific files used for the application
 File_names:
   csv_filename: "data.csv"                      # Name of the csv file within the csv directory
-  log_filename: "Log.txt"                       # Name of the log file within the root directory
 ```
 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -99,6 +98,28 @@ The images folder is used to store the images for the application. This folder c
 
 > Important
 > Canvas recommends that your image file be as small as possible for the image being uploaded. Use compression where possible. 
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Running the script
+The program must be run with **at least** python 3.9.0, any version below this will not have some of the required features. The program is run using the *canvas_uploader.py* script, there are some command line arguments which can be used to change the behaviour of the script. These are included outside of the settings file, as they may be used on a more individual run basis.
+
+### Command line arguments
+- *( -p , --producers)
+  - This argement is used to specify the number of client producer threads, generally this process is quite fast, and will quickly create all users which are to be uploaded.
+- ( -c , --consumers)
+  - This argument is used to specify the number of uploaders which are sending the users to canvas. **Warning** too many uploaders may cause rate limits to be hit, likewise, they will use considerable CPU resources if this number is set too high
+- ( -t, --timeout)
+  - This argument is used to override the default HTTP timeout used in the program. If your internet connection or connection to the server is slow, you may wish to increase this value. Note, that the default is 2 seconds.
+- ( -d, --dry-run)
+  - This is used to do a dry run of the upload, this will create all producers and consumers, then go through a limited number of the upload steps. It will not upload any images to canvas, and it will not set any images. **NOTE** this can take considerable time depending on settings and number of users/threads.
+
+### Memory considerations
+The program does not take the host machine's memory into consideration, and will load all of the users from the source into memory along with the image files. This can take a considerable amount of RAM depending on the size of the images and the size of the list of users. 
+
+The program has been tested with 3000 users and standard profile picture size images ( 150 x 150 ), and approximately 300Mb of ram was used. Ensure that you keep memory limits in mind especially when exporting images for profile pictures. 
+
+> IMPORTANT
+> Canvas likewise recommends that the images be as small as possible, as transfers and file storage limits are in place. Compression is recommended, as is ensuring your images are of standard Canvas profile picture size.
 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

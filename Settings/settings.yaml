@@ -13,4 +13,3 @@ Canvas_data:
 # Specific files used for the application
 File_names:
   csv_filename: "data.csv"                      # Name of the csv file within the csv directory
-  log_filename: "Log.txt"                       # Name of the log file within the root directory
