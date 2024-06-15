@@ -170,7 +170,9 @@ class Main:
             connector.set_image_as_avatar(user)
         except Exception as e:
             self.log.error(
-                "Could not process user: %s - %s".format(user.client_id, e.__repr__)
+                "Could not process user: %s - %s",
+                user.client_id,
+                e
             )
             self.skipped_users.append(user)
 
@@ -297,7 +299,9 @@ class Main:
         for count, user in enumerate(self.skipped_users):
             # Log the skipped users
             self.log.error(
-                "%i : %s".format(count, user.client_id)
+                "%i : %s",
+                count, 
+                user.client_id
             )
 
 if __name__ == "__main__":
