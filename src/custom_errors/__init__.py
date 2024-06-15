@@ -9,4 +9,4 @@
 ## Module imports
 ###########################
 
-from .errors import DirectoriesCheckError,SettingsLoadError,CanvasError                   # Error when verifying critical folders
+from .errors import DirectoriesCheckError,SettingsLoadError,CanvasError, CanvasAvatarSetError                   # Error when verifying critical folders

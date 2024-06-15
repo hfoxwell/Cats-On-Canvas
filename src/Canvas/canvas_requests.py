@@ -14,6 +14,7 @@ import requests
 
 # Internal imports
 from src.Clients import Client
+from src import custom_errors
 
 
 class Canvas_connector(ABC):
@@ -168,7 +169,8 @@ class POST_data_canvas(Canvas_connector):
                 e,
                 response.text
             )
-            return False
+            raise custom_errors.CanvasAvatarSetError("Error in upload Parameter.")
+        
         # Send the file to canvas
         # Get upload confirmation
         upload_file_response = requests.post(
@@ -200,7 +202,7 @@ class POST_data_canvas(Canvas_connector):
             # If another value returns then there was an issue
             # Exit the application
             self.log.error("CANVAS: File upload Failed")
-            return False
+            raise custom_errors.CanvasError("File upload failed.")
 
         # Get file ID From canvas
         if "id" in confirmation.json():
@@ -235,7 +237,7 @@ class POST_data_canvas(Canvas_connector):
             self.log.error(
                 "Upload params is empty, cannot set image avatar."
             )
-            return False
+            raise custom_errors.CanvasAvatarSetError("Upload Params empty.")
 
 
         # Set parameters as the user_id
@@ -258,24 +260,41 @@ class POST_data_canvas(Canvas_connector):
         # the image that was uploaded.
         for avatar_opts in avatar_options.json():
 
+            self.log.debug("Checking Token: [%s] against [%s]",
+                           avatar_opts.get("id"),
+                           self.user.image.image_canvas_id
+                           )
+
             # If the current avatar has the same name as the uploaded image
             # Set params to be 'user[avatar][token] = <token>.
             # The image token is unique to each request. So cannot be
             # relied on between sessions.
-            if avatar_opts.get("display_name") == self.user.image.image_name:
+            if avatar_opts.get("id") == self.user.image.image_canvas_id:
                 self.upload_params["user[avatar][token]"] = avatar_opts.get("token")
+                break
 
-            # Create put request to tell canvas to update pfp
-            # This is done as a put to prevent POST from regenerating
-            # outputs
-            set_avatar_user = requests.put(
-                f"{self.domain}/users/{self.user.client_id}",
-                headers=self.header,
-                params=self.upload_params,
-                timeout=self.timeout
+        # Check that params were set. If the avatar has not been 
+        # found then a key error will be raised. 
+        try:
+            _ = self.upload_params["user[avatar][token]"]
+        except KeyError as ke:
+            self.log.error(
+                "Unable to find Avatar in available Avatars: USER: %s",
+                self.user.client_id
             )
-            set_avatar_user.raise_for_status()
-            self.log.debug('Set avatar: %s', set_avatar_user.text)
+            raise custom_errors.CanvasAvatarSetError("Unable to find avatar.")
+
+        # Create put request to tell canvas to update pfp
+        # This is done as a put to prevent POST from regenerating
+        # outputs
+        set_avatar_user = requests.put(
+            f"{self.domain}/users/{self.user.client_id}",
+            headers=self.header,
+            params=self.upload_params,
+            timeout=self.timeout
+        )
+        set_avatar_user.raise_for_status()
+        self.log.debug('Set avatar: %s', set_avatar_user.text)
 
         # If the canvas response is 200, then the update has been successful
         if set_avatar_user.status_code == 200:
@@ -288,4 +307,4 @@ class POST_data_canvas(Canvas_connector):
                 f"CANVAS: Error updating avatar for: {self.user.client_id},"
                 + f" error: {set_avatar_user.status_code}"
             )
-            return False
+            raise custom_errors.CanvasAvatarSetError("Failed to update avatar.")

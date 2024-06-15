@@ -135,7 +135,14 @@ class Consumer(Worker):
                 self.log.error(
                     'Could not process user: %s \t %s', self.client.client_id, e
                 )
-                
+            except custom_errors.CanvasError as CE:
+                self.log.error(
+                    'Could not process user: %s \t %s', self.client.client_id, CE
+                )
+            except custom_errors.CanvasAvatarSetError as CASE:
+                self.log.error(
+                    'Could not process user: %s \t %s', self.client.client_id, CASE
+                )
             
             self.queue.task_done()
             self.working = False
