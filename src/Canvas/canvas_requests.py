@@ -135,7 +135,7 @@ class POST_data_canvas(Canvas_connector):
         inform_parameters = {
             "name": self.user.image.image_name,
             "size": self.user.image.image_size,  # read the filesize
-            "content_type": self.user.image.file_type,
+            #"content_type": self.user.image.file_type, # BUG: including this breaks upload
             "parent_folder_path": "profile pictures",
             "as_user_id": self.user.client_id,
         }
