@@ -46,5 +46,5 @@ class ImageFactory:
             image_file = img_bytes,
             image_name = image_path.name,
             image_path = str(image_path),
-            file_type = image_path.suffix
+            file_type = image_path.suffix.strip().replace('.', '')
         )
