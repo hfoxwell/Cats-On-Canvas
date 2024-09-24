@@ -170,68 +170,7 @@ class POST_data_canvas(Canvas_connector):
 
         # Successfully uploaded file
         return True
-
-        """Sets and image to be a users PFP"""
-
-        # Check that upload params contains values
-        if self.upload_params == {}:
-            self.log.error(
-                "Upload params is empty, cannot set image avatar."
-            )
-            return False
-
-        # Log that Canvas avatar is being updated
-        self.log.info(
-            f"Setting canvas Avatar for: {user.client_id} To: {user.image.image_name}"
-        )
-
-        # Set parameters as the user_id
-        self.upload_params = {"as_user_id": f"{user.client_id}"}
-
-        # Get-Request the user avatars images, to get image id
-        avatar_options = requests.get(
-            f"{self.domain}/users/{user.client_id}/avatars",
-            headers=self.header,
-            params=self.upload_params,
-        )
-        
-        avatar_options.raise_for_status()
-
-        # As there are multiple avatars that come stock with canvas
-        # the program needs to iterate through the avatars to find
-        # the image that was uploaded.
-        for avatar_opts in avatar_options.json():
-
-            # If the current avatar has the same name as the uploaded image
-            # Set params to be 'user[avatar][token] = <token>.
-            # The image token is unique to each request. So cannot be
-            # relied on between sessions.
-            if avatar_opts.get("display_name") == user.image.image_name:
-                self.upload_params["user[avatar][token]"] = avatar_opts.get("token")
-
-            # Create put request to tell canvas to update pfp
-            # This is done as a put to prevent POST from regenerating
-            # outputs
-            set_avatar_user = requests.put(
-                f"{self.domain}/users/{user.client_id}",
-                headers=self.header,
-                params=self.upload_params,
-            )
-            
-            set_avatar_user.raise_for_status()
-
-        # If the canvas response is 200, then the update has been successful
-        if set_avatar_user.status_code == 200:
-            self.log.info(f"success updating user avatar for: {user.client_id}")
-
-            return True
-        else:
-            # If the update was not successful, log the result
-            self.log.error(
-                f"CANVAS: Error updating avatar for: {user.client_id},"
-                + f" error: {set_avatar_user.status_code}"
-            )
-            return False
+    
     def set_image_as_avatar(self, user: client) -> bool:
         """Sets an image to be a user's PFP"""
 
