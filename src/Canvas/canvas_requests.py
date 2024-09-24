@@ -233,3 +233,49 @@ class POST_data_canvas(Canvas_connector):
                 + f" error: {set_avatar_user.status_code}"
             )
             return False
+    def set_image_as_avatar(self, user: client) -> bool:
+        """Sets an image to be a user's PFP"""
+
+        # Ensure the upload parameters are correctly set
+        if not self.upload_params:
+            self.log.error("Upload params is empty, cannot set image avatar.")
+            return False
+
+        # Log that Canvas avatar is being updated
+        self.log.info(f"Setting canvas Avatar for: {user.client_id} To: {user.image.image_name}")
+
+        # Fetch the avatar options for the user (without using as_user_id unnecessarily)
+        avatar_options = requests.get(
+            f"{self.domain}/users/{user.client_id}/avatars",
+            headers=self.header,
+        )
+        
+        avatar_options.raise_for_status()
+
+        # Iterate through the avatars to find the matching uploaded image
+        token = None
+        for avatar_opt in avatar_options.json():
+            if avatar_opt.get("display_name") == user.image.image_name:
+                token = avatar_opt.get("token")
+                break
+
+        # If the token is found, proceed to update the avatar
+        if token:
+            self.log.info(f"Avatar token found for: {user.client_id}, setting image as avatar.")
+            # Update the avatar for the specific user
+            set_avatar_user = requests.put(
+                f"{self.domain}/users/{user.client_id}",
+                headers=self.header,
+                params={"user[avatar][token]": token},
+            )
+            set_avatar_user.raise_for_status()
+
+            if set_avatar_user.status_code == 200:
+                self.log.info(f"Success updating user avatar for: {user.client_id}")
+                return True
+        else:
+            self.log.error(f"No matching avatar found for image: {user.image.image_name} for user {user.client_id}")
+
+        # Log and return false if the avatar was not updated
+        self.log.error(f"Failed to update avatar for user {user.client_id}")
+        return False
