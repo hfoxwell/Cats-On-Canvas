@@ -171,7 +171,6 @@ class POST_data_canvas(Canvas_connector):
         # Successfully uploaded file
         return True
 
-    def set_image_as_avatar(self, user: client) -> bool:
         """Sets and image to be a users PFP"""
 
         # Check that upload params contains values
