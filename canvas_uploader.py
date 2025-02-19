@@ -284,7 +284,6 @@ class Main:
         client_buffer.join()
         self.log.info("Finished")
 
-
 def arg_parse():
     """Parse command line arguments"""
     argument_parser = argparse.ArgumentParser()
@@ -294,7 +293,6 @@ def arg_parse():
     argument_parser.add_argument("-t", "--timeout", type=int, default=2)
 
     return argument_parser.parse_args()
-
 
 if __name__ == "__main__":
     # Sets up the program and runs the canvas uploader
