@@ -27,11 +27,11 @@ class SettingsLoader:
         # If the file cannot be found, raise and error
         raise FileNotFoundError("Settings file cannot be found.")
 
-    def load_settings(self, file_path: str, parser):
+    def load_settings(self, file_path: str, parser, configuration_class):
         ''' Creates the settings parser object using the file path from 'find_settings_file'''
         # Open file path
         with open(file=file_path, encoding="utf-8") as settings_file:
             # If file cannot be opened or processed
             if not (parser.read_file(settings_file)):
-                raise FileNotFoundError("Settings file cannot be found.")
-        return parser.load_config()
+                raise FileNotFoundError("Settings file cannot be read.")
+        return parser.load_config(configuration_class)

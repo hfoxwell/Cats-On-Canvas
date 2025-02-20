@@ -19,3 +19,13 @@ class SettingsLoadError(Exception):
     def __init__(self, message: str) -> None:
         self.message: str = message
         super().__init__(self.message)
+        
+class CanvasError(Exception):
+    def __init__(self, message: str) -> None:
+        self.message = message
+        super().__init__(self.message)
+        
+class CanvasAvatarSetError(Exception):
+    def __init__(self, message: str) -> None:
+        self.message = message
+        super().__init__(self.message)

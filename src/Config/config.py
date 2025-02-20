@@ -6,6 +6,7 @@
 '''
 
 # External imports
+import logging
 from dataclasses import dataclass
 
 try:
@@ -13,69 +14,64 @@ try:
 except ImportError as e:
     raise ImportError(f"Cannot import YAML parsing package: {e}")
 
-# Internal Imports
+# Create logger
+log = logging.getLogger(__name__)
+
+#Base Class configuration
+@dataclass
+class Configuration:
+    '''Base class for configuration'''
+    working_path: str = ""
+    # Canvas access settings
+    access_token: str = ""
+    domain: str = ""
 
 
 # Classes
 @dataclass()
-class Config():
+class CSVConfig(Configuration):
     '''Store the settings config'''
     # Directory settings
-    working_path: str
-    csv_directory: str
-    images_path: str
-
-    # Canvas access settings
-    access_token: str
-    domain: str
-
+    csv_directory: str = ""
+    images_directory: str = ""
     # File settings
-    log_filename: str
-    csv_filename: str
+    csv_filename: str = ""
 
 
-class YAML_Parser():
+class YAMLParser():
     '''Parses yaml settings'''
 
     def __init__(self) -> None:
-        self.configuration: Config = Config
         self.Settings_contents = None
 
     def read_file(self, settings_file) -> bool:
         ''' Read the config from Yaml file '''
-        # Variables
-
         try:
             # Read the yaml file
             self.Settings_contents = yaml.safe_load(settings_file)
 
         except yaml.YAMLError as exc:
-            # if the error contains problem mark
-            # then identify where the error was
-            if hasattr(exc, 'problem_mark'):
-                # Get the problem mark
-                mark = exc.problem_mark
-                # Print out to the user
-                print(f'Error position: ({mark.line}:{mark.column})')
-
-            # Indicate the failure of the function
+            # Handle YAML parsing errors
+            log.error("Error reading YAML file: %s",exc)
             return False
 
-        # If no error indicate function success
-        print("SUCCESS: Settings Loaded")
+        # Indicate successful reading of settings
+        log.info("SUCCESS: Settings Loaded")
         return True
 
-    def load_config(self) -> Config:
-        ''' load a config'''
-        
-        conf = self.configuration(
-            working_path=self.Settings_contents['Directories']['working_path'],
-            access_token=self.Settings_contents['Canvas_data']['access_token'],
-            domain=self.Settings_contents['Canvas_data']['domain'],
-            csv_directory=self.Settings_contents['Directories']['csv_directory'],
-            csv_filename=self.Settings_contents['File_names']['csv_filename'],
-            images_path=self.Settings_contents['Directories']['images_directory'],
-            log_filename=self.Settings_contents['File_names']['log_filename']
-        )
+    def load_config(self, configuration_class) -> object:
+        ''' Load a config '''
+        # Initialize an empty configuration object
+        conf = configuration_class()
+
+        # Update configuration object with settings from YAML file
+        for section, options in self.Settings_contents.items():
+            for key, value in options.items():
+                # Check if the attribute exists in the configuration class
+                if hasattr(conf, key):
+                    # Set the attribute value dynamically
+                    setattr(conf, key, value)
+                else:
+                    log.warning("Warning: Ignoring unknown setting '%s'", key)
 
         return conf

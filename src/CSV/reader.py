@@ -37,7 +37,7 @@ class CSVReader(Reader):
         # Assign source file
         self.source_file = source_file.open_file
 
-    def get_clients(self) -> list:
+    def get_clients(self) -> list[dict[str, str]]:
         ''' Read clients from csv and return details'''
         # Variables
         clients_list = []                         # Create list of clients

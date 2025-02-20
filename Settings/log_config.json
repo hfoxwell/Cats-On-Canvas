@@ -24,9 +24,8 @@
             "maxBytes" : 10000000,
             "backupCount" : 3
         }
-    }
-    ,
+    },
     "loggers" : {
-        "root":{"level" : "DEBUG", "handlers": ["stdout", "file"]}
+        "root":{"level" : "INFO", "handlers": ["file", "stdout"]}
     }
 }

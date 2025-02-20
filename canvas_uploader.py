@@ -9,12 +9,15 @@
 # External imports
 import os
 import sys
-from concurrent.futures import ThreadPoolExecutor
+import argparse
+from datetime import datetime
+from pathlib import Path
+from queue import Queue
 
 # Internal imports
 from src import CSV, Canvas, Clients, Config
 from src import File as SourceFile
-from src import Image, Logger, Settings, custom_errors
+from src import Image, Logger, Settings, Workers, custom_errors
 
 
 def check_python_version() -> None:
@@ -52,16 +55,27 @@ class Main:
     This is the main entry for the program
     """
 
-    # Constants
-    SETTINGS_DIRECTORY = "./Settings/"
+    def __init__(self, args: argparse.Namespace) -> None:
+        # Constants
+        self.SETTINGS_DIRECTORY = "./Settings/"
+        self.LOGGING_CONFIG = "log_config.json"
+        self.DRY_RUN = args.dry_run
+        self.PRODUCERS = args.producers
+        self.CONSUMERS = args.consumers
+        self.REQUEST_TIMEOUT = args.timeout
 
-    # Class variables
-    settings: Config.Config
-
-    def __init__(self) -> None:
+        # Variables
+        self.settings: Config.Configuration
         self.settings_loader = Settings.SettingsLoader()
-        self.settings_parser = Config.YAML_Parser()
-        self.skipped_users: list[Clients.client] = []
+        self.settings_parser = Config.YAMLParser()
+        self.skipped_users: list[Clients.Client] = []
+        self.producers = []
+        self.consumers = []
+
+        #######################################
+        # Initalise the log
+        #######################################
+        self.log = Logger.configure_logging("Settings/log_config.json", __name__)
 
     def check_directories(self, *directory_list) -> None:
         """
@@ -85,8 +99,8 @@ class Main:
                 raise custom_errors.DirectoriesCheckError(
                     f"Directory missing: {directory}"
                 )
-            else:
-                self.log.info('File: "%s" found.', directory)
+            
+            self.log.info('File: "%s" found.', directory)
 
             # If folder empty, then raise value error
             if not os.listdir(directory):
@@ -95,94 +109,39 @@ class Main:
                     f"Directory is empty: {directory}"
                 )
 
-    def create_student_list(
-        self, client_list: list[dict[str, str]], img_location: str
-    ) -> list[Clients.client]:
-        """Returns a list of user objects"""
-        # Variables
-        user_list: list[Clients.client] = []
-
-        # Iterate through list from Csv
-        for student in client_list:
-
-            # Write to logfile the current student being processed
-            self.log.info("Current Student: %s", student)
-
-            # confirm user's image exists in directory
-            try:
-                # Create an image factory object and validate image creation.
-                image_factory: Image.imageFactory = Image.imageFactory(
-                    img_location, student["image_filename"]
-                )
-            except OSError as e:
-                # if error raised by factory, image does not exits.
-                self.log.exception(
-                    FileNotFoundError(f'FILE: {e} {student["image_filename"]}')
-                )
-                self.log.info(
-                    "USER: user, %s Skipped as no image could be found",
-                    student["client_id"],
-                )
-                continue
-
-            # Create user object
-            try:
-                user: Clients.client = Clients.client(
-                    student["client_id"], image_factory.open_image()
-                )
-            except Exception as user_error:
-                # Catch error creating user
-                # Write this to log
-                self.log.error(
-                    "USER: Could not create user %s : %s",
-                    student["client_id"],
-                    user_error,
-                )
-                continue
-
-            ###################
-            # Print out created user details
-            ###################
-            self.log.info(f"Creating:\tUser - {user.client_id:^20} Image: {user.image.image_name:>20}")
-
-            # Add user object to list of users
-            user_list.append(user)
-
-        ###############################
-        # Console & log Number of users
-        ###############################
-        self.log.info("Total of %i users created", len(user_list))
-
-        # Return list of user objects
-        return user_list
-
-    def process_user(self, user: Clients.client, connector: Canvas.POST_data_canvas):
-        """upload a user to canvas"""
-        try:
-            # Step 0: Get canvas user ID via SIS ID
-            connector.get_canvas_id(user)
-
-            # Step 1: Start upload file to user's file storage
-            connector.upload_user_data(user)
-            # if no upload happened log and next student
-
-            # Step 2: Make API call to set avatar image
-            connector.set_image_as_avatar(user)
-        except Exception as e:
-            self.log.error(
-                "Could not process user: %s - %s",
-                user.client_id,
-                e
-            )
-            self.skipped_users.append(user)
-
     # Main function
     def main(self):
         """Main function for controlling application flow"""
         # Variables
-
         list_of_clients: list[dict[str, str]] = []
+        client_identifier_buffer: Queue[Clients.ClientIdentifier] = Queue()
+        client_buffer: Queue[Clients.Client] = Queue()
 
+        #######################################
+        ## Debug log current config
+        #######################################
+        self.log.debug(
+            '''
+            Configuration:
+            \tDry_run: %s| 
+            \tSettings_dir: %s|
+            \tLogging_config: %s|
+            \tProducer_count: %s|
+            \tConsumer_count: %s|
+            \tRequest_timeout: %s|
+            ''',
+            self.DRY_RUN,
+            self.SETTINGS_DIRECTORY,
+            self.LOGGING_CONFIG,
+            self.PRODUCERS,
+            self.CONSUMERS,
+            self.REQUEST_TIMEOUT
+        )
+        if self.DRY_RUN:
+            self.log.info(
+                '######### DRY RUN #########'
+            )
+        
         #######################################
         # Initalise settings for the program
         #######################################
@@ -190,14 +149,24 @@ class Main:
         settings_file_path = self.settings_loader.find_settings_file(
             self.SETTINGS_DIRECTORY
         )
-        self.settings = self.settings_loader.load_settings(
-            settings_file_path, self.settings_parser
+        self.settings: Config.CSVConfig = self.settings_loader.load_settings(
+            settings_file_path, self.settings_parser, Config.CSVConfig
         )
-
-        #######################################
-        # Initalise the log
-        #######################################
-        self.log = Logger.configure_logging("Settings/log_config.json", __name__)
+        
+        #########################################
+        # Debug settings file configuration
+        #########################################
+        self.log.debug(
+            '''
+            Settings file confgiuration:
+            \tWorking_path: %s|
+            \tCSV_directory: %s|
+            \tImages_directory: %s|
+            ''',
+            self.settings.working_path,
+            self.settings.csv_directory,
+            self.settings.images_directory
+        )
 
         #########################################
         # Verify that directories exist
@@ -208,7 +177,7 @@ class Main:
         # if the directories are not valid
         try:
             self.check_directories(
-                self.settings.images_path, self.settings.csv_directory
+                self.settings.images_directory, self.settings.csv_directory
             )
 
         except custom_errors.DirectoriesCheckError:
@@ -249,60 +218,81 @@ class Main:
         ######################################
         # Create users
         #####################################
-        # For each dictionary in the list
-        # log details and create a user object
-        user_list = self.create_student_list(list_of_clients, self.settings.images_path)
+        # Enqueue all client identifiers
+        for client in list_of_clients:
+            temp_client = Clients.ClientIdentifier(
+                client_id=client["client_id"],
+                profile_picture_path=Path(
+                    self.settings.images_directory, client["image_filename"]
+                ),
+                file_type=client["image_filetype"],
+                date_uploaded=datetime.now(),
+            )
+            client_identifier_buffer.put(temp_client)
 
         # Now that users have been created upload them to canvas
         # if no users have been created. Then EXIT the program
-        if len(user_list) > 0:
+        if client_identifier_buffer.qsize():
             self.log.info(
-                "All possible users have been created. A total of %i", len(user_list)
+                "All possible users have been created. A total of %i",
+                client_identifier_buffer.qsize(),
             )
-            self.log.info("Creating canvas object...")
+            self.log.info("Creating workers.")
         else:
             self.log.warning("USER: no users were found. Exiting..")
-            exit()
-
-        #########################################
-        # Create and initialise canvas connector
-        #########################################
-        try:
-            #  Attempt to connect to canvas
-            connector = Canvas.POST_data_canvas(
-                self.settings.access_token, self.settings.domain
-            )
-
-        except Exception as e:
-            # If error is reported in connecting to canvas
-            self.log.critical("CONNECTOR: Error connecting to canvas: %s", e)
-            exit()
-
-        self.log.info("Successfully created canvas connection. Commencing upload.")
+            sys.exit(1)
 
         ########################################
-        # For each user Start upload process
+        # Create Producers and Consumers
         ########################################
-        with ThreadPoolExecutor(max_workers=10) as executor:
-            
-            # For each student in user list upload data to canvas
-            # Make sure enumerate starts at 1
-
-            # Call function to process a user
-            future_tasks = [executor.submit(self.process_user, user, connector) for user in user_list]
-
-            for future in future_tasks:
-                future.result()
-        
-        # Log the skipped users    
-        self.log.info("The following users were skipped:")
-        for count, user in enumerate(self.skipped_users):
-            # Log the skipped users
-            self.log.error(
-                "%i : %s",
-                count, 
-                user.client_id
+        self.log.info("Creating %i producers", self.PRODUCERS)
+        self.producers = [
+            Workers.Producer(
+                user_queue=client_buffer,
+                available_users=client_identifier_buffer,
+                image_factory=Image.ImageFactory(),
             )
+            for _ in range(self.PRODUCERS)
+        ]
+
+        self.log.info("Creating %i consumers", self.CONSUMERS)
+        self.consumers = [
+            Workers.Consumer(
+                user_queue=client_buffer,
+                canvas_connector=Canvas.POST_data_canvas(
+                    self.settings.access_token,
+                    self.settings.domain,
+                    timeout=self.REQUEST_TIMEOUT,
+                    dry_run=self.DRY_RUN,
+                ),
+            )
+            for _ in range(self.CONSUMERS)
+        ]
+
+        #########################################
+        # Start producers and consumers
+        #########################################
+        self.log.info("Starting Production/Consumption")
+
+        for producer in self.producers:
+            producer.start()
+
+        for consumer in self.consumers:
+            consumer.start()
+
+        client_identifier_buffer.join()
+        client_buffer.join()
+        self.log.info("Finished")
+
+def arg_parse():
+    """Parse command line arguments"""
+    argument_parser = argparse.ArgumentParser()
+    argument_parser.add_argument("-d", "--dry-run", type=bool, default=False)
+    argument_parser.add_argument("-p", "--producers", type=int, default=2)
+    argument_parser.add_argument("-c", "--consumers", type=int, default=5)
+    argument_parser.add_argument("-t", "--timeout", type=int, default=2)
+
+    return argument_parser.parse_args()
 
 if __name__ == "__main__":
     # Sets up the program and runs the canvas uploader
@@ -313,5 +303,5 @@ if __name__ == "__main__":
     check_python_version()
 
     # If module is run by itself then run main
-    main_object: object = Main()  # Create main object
+    main_object: object = Main(arg_parse())  # Create main object
     main_object.main()  # Run main from object
